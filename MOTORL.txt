@@ -1,0 +1,90 @@
+0 - Startup: LD3 A5 V5
+1 - Shutdown: S ST1
+2 - ShutdownT: S ST1
+3 - Stop: S
+4 - Move Up: H+ G
+5 - Move Down: H- G
+6 - 1cm Move: A5 V5 D16778 ST0
+7 - Adjust Move: A5 V5 D5033436 ST0
+8 - Test Move: A5 V5 D
+9 - Specific Move: A5 V5 D
+10- Normal Cur:  ST0
+11- Steps/M: 1677812
+12- Move Time: 14000
+13- Velocity Pulse Adjust: -200
+
+botão Voltar no Auto-Teste
+botão Cancelar (fecha o Novo Ensaio) no Ajuste da posição inicial do elevador
+VOLTAR no Selecione a superfície..- Abre Emergência - com Descer o suporte, Continuar ou Sair
+
+tmrDesligaMotor.enabled := true;
+        tmrDesligaMotor.Enabled := false;
+tmrDanger.Enabled := false ;
+
+frmMachineControl.ComandoMotor(#13+frmHelmet.lstMotor.Lines[1]+#13); // 1 - Shutdown MOTOR.RGJ
+frmMachineControl.ComandoMotor(#13+frmHelmet.lstMotor.Lines[2]+#13); // 2 - ShutdownT MOTOR.RGJ
+
+
+	DESCER O SUPORTE  DESCER O SUPORTE  DESCER O SUPORTE  DESCER O SUPORTE
+===============================================================================}
+procedure TfrmNovoEnsaio.btnDescerClick(Sender: TObject);
+
+        iStepsM := strtoint(frmHelmet.lstMotor.Lines[11]); // 11- Steps/M: 1677812
+        laltura := Trunc(iStepsM * StrToFloat(sAltura)) ; //MOTOR.RGJ
+        sMotor := #13+frmHelmet.lstMotor.Lines[8]+inttostr(laltura)+frmHelmet.lstMotor.Lines[10]+#13; //MOTOR.RGJ
+	frmMachineControl.ComandoMotor( sMotor ) ; //MOTOR.RGJ
+        frmMachineControl.ComandoMotor(#13+frmHelmet.lstMotor.Lines[5]+#13); // 5 - Move Down MOTOR.RGJ
+
+
+        cbDBitOut(1, FIRSTPORTA, 23, 1);
+        frmMachineControl.Delay(200);
+        cbDBitOut(1, FIRSTPORTA, 23, 0);
+
+procedure TfrmNovoEnsaio.SpeedButton1Click(Sender: TObject);
+
+
++frmHelmet.lstMotor.Lines[5]+
+Test Move
+laltura := Trunc(1677812 * StrToFloat(sAltura)) ; //MOTOR.RGJ   //aqui
+stepsm
+#13'A2.5 V2.5 D' + inttostr(laltura) + ' ST0'#13
+
+Specific Move
+
+
+Direction Up (dir_up): H+
+Direction Down (dir_down): H-
+Acceleration:
+2.5
+Velocity:
+2.5
+[Adjust_Settings]
+
+        iErr := cbCLoad(0, LOADREG, 0);
+	if iErr <> 0 then ShowMessage('Erro ao carregar sensor de Velocidade.');
+                //Delay(10);
+                cbCin(0, LOADREG,temp2);
+                //showmessage(inttostr(temp2));
+        	sform  :=  '######.000' ;
+	        mili   := (temp2 - 100) / 1000 ;
+        	//vel := ((strtofloat(sAltSens)/1000)/(mili/1000)) ;
+                vel := (strtofloat(sAltSens)) / mili;
+
+                {//JOTA
+                if (vel < (strtofloat(sVeloc) - 0.15)) then
+                        vel := strtofloat(sVeloc) + (Random(14)/100);
+                if (vel > (strtofloat(sVeloc) + 0.15)) then
+                        vel := strtofloat(sVeloc) - (Random(14)/100);
+                //FIMJOTA   }
+
+
+Le velocidade
+Jota
+sform
+
+cbDConfigPort(1, FIRSTPORTCL, DIGITALOUT);
+cbDConfigPort(1, FIRSTPORTCH, DIGITALOUT);
+
+CbDBitOut(1, FIRSTPORTA, 23, 0) ; // não conta
+CbDBitOut(1, FIRSTPORTA, 23, 1) ; // conta
+

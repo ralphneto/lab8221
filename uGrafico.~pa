@@ -1,0 +1,131 @@
+unit uGrafico;
+
+
+interface
+
+
+uses
+	Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+	TeEngine, Series, ExtCtrls, TeeProcs, Chart, ComCtrls, ToolWin, ExtDlgs;
+
+
+type
+	TfrmGrafico = class(TForm)
+		tcGrafico	: TChart;
+		lsLinha		: TLineSeries;
+    tbGrafico: TToolBar;
+    ilGrafico: TImageList;
+    tbtnSalvar: TToolButton;
+		tbtnImprimir: TToolButton;
+		dlgSalvarGrafico: TSavePictureDialog;
+    dlgPrinterSetup: TPrinterSetupDialog;
+		btnXYZ: TToolButton;
+		lsX: TLineSeries;
+		lsY: TLineSeries;
+		lsZ: TLineSeries;
+    tmrZoom: TTimer;
+		procedure tbtnSalvarClick(Sender: TObject);
+		procedure tbtnImprimirClick(Sender: TObject);
+		procedure ToolButton1Click(Sender: TObject);
+		procedure btnXYZClick(Sender: TObject);
+		procedure ZoomIn ;
+    procedure FormShow(Sender: TObject);
+    procedure tmrZoomTimer(Sender: TObject);
+	private
+	public
+	end;
+
+
+var
+	frmGrafico		:	TfrmGrafico;
+
+
+implementation
+
+uses
+			uImpactoPrint, uNovoEnsaio, uHelmet ;
+
+{$R *.DFM}
+
+
+{===============================================================================
+
+===============================================================================}
+procedure TfrmGrafico.tbtnSalvarClick(Sender: TObject);
+var
+	sExt	:	string;
+begin
+	if not dlgSalvarGrafico.Execute then Exit;
+	sExt := ExtractFileExt(dlgSalvarGrafico.FileName);
+	sExt := Copy(UpperCase(sExt), 2, 3);
+	if (sExt='WMF') then
+		tcGrafico.SaveToMetafile(dlgSalvarGrafico.FileName)
+	else if (sExt='EMF') then
+		tcGrafico.SaveToMetafileEnh(dlgSalvarGrafico.FileName)
+	else if (sExt='BMP') then
+		tcGrafico.SaveToBitMapFile(dlgSalvarGrafico.FileName);
+end;
+
+procedure TfrmGrafico.tbtnImprimirClick(Sender: TObject);
+begin
+	// Salva gráfico e coloca no report
+	frmGrafico.tcGrafico.SaveToMetafile('HMTGRAF.WMF') ;
+	frmImpactoPrint.qrGrafico.Picture.LoadFromFile('HMTGRAF.WMF') ;
+	frmHelmet.SaveImpacto('UltimoEnsaio.hmi');	
+	if dlgPrinterSetup.Execute then
+    begin
+    	frmImpactoPrint.qrImpacto.ShowProgress := true ;
+			frmImpactoPrint.qrImpacto.Print ;
+    	//frmImpactoPrint.qrImpacto.EndPage ;
+    	{ while FileExists('E'+FormatFloat('00000', frmHelmet.ESCount)) do
+        begin
+        	frmHelmet.EScount := frmHelmet.ESCount + 1 ;
+        end; }
+    end;
+end;
+
+procedure TfrmGrafico.ToolButton1Click(Sender: TObject);
+begin
+	frmImpactoPrint.Show ;
+end;
+
+procedure TfrmGrafico.btnXYZClick(Sender: TObject);
+begin
+	if btnXYZ.caption = 'Mostra XYZ' then
+	begin
+		tcGrafico.Series[0].active := true ;
+		tcGrafico.Series[1].active := true ;
+		tcGrafico.Series[2].active := true ;
+		tcGrafico.Series[3].active := true ;
+		btnXYZ.ImageIndex := 3;
+		btnXYZ.Caption := 'Apaga XYZ' ;
+	end
+	else
+	begin
+		tcGrafico.Series[0].active := true ;
+		tcGrafico.Series[1].active := false ;
+		tcGrafico.Series[2].active := false ;
+		tcGrafico.Series[3].active := false ;
+        btnXYZ.ImageIndex := 2;
+		btnXYZ.Caption := 'Mostra XYZ' ;
+	end ;
+end;
+
+procedure TfrmGrafico.ZoomIn ;
+begin
+	frmNovoEnsaio.Zoom( frmNovoEnsaio.dMax, frmNovoEnsaio.PosicaoX ) ;
+end;
+
+procedure TfrmGrafico.FormShow(Sender: TObject);
+begin
+	tcGrafico.UndoZoom ;
+	tmrZoom.enabled := true ;
+end;
+
+procedure TfrmGrafico.tmrZoomTimer(Sender: TObject);
+begin
+	tmrZoom.enabled := false ;
+	frmNovoEnsaio.Zoom( frmNovoEnsaio.dMax, frmNovoEnsaio.PosicaoX+100 ) ;
+end;
+
+	end.

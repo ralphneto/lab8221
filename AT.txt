@@ -1,0 +1,34 @@
+                        iStepsM: longint;
+        iStepsM := strtoint(frmHelmet.lstMotor.Lines[11]); // 11- Steps/M: 1677812
+        laltura := Trunc(iStepsM * StrToFloat(sAltura)) ; //MOTOR.RGJ
+        sMotor := #13+frmHelmet.lstMotor.Lines[8]+inttostr(laltura)+frmHelmet.lstMotor.Lines[10]+#13; //MOTOR.RGJ
+
+	// Mandar motor subir
+        iStepsM := strtoint(frmHelmet.lstMotor.Lines[12]); // 12- Move Time: 14000
+	SetStatus('Motor command ('+sMotor+') - Estimated Time:' + floattostr(Trunc((StrToFloat(sAltura) * iStepsM)))); //MOTOR.RGJ
+	frmMachineControl.ComandoMotor( sMotor ) ; //MOTOR.RGJ
+        frmMachineControl.ComandoMotor(#13+frmHelmet.lstMotor.Lines[4]+#13); // 4 - Move Up MOTOR.RGJ
+	frmNovoEnsaio.Delay (Trunc((StrToFloat(sAltura) * iStepsM))) ; //MOTOR.RGJ
+
+        frmMachineControl.ComandoMotor(#13+frmHelmet.lstMotor.Lines[0]+#13) ; // 0 - Startup MOTOR.RGJ
+        frmMachineControl.ComandoMotor(#13+frmHelmet.lstMotor.Lines[1]+#13) ; // 1 - Shutdown MOTOR.RGJ
+        frmMachineControl.ComandoMotor(#13+frmHelmet.lstMotor.Lines[2]+#13) ; // 2 - ShutdownT MOTOR.RGJ
+        frmMachineControl.ComandoMotor(#13+frmHelmet.lstMotor.Lines[3]+#13) ; // 3 - Stop MOTOR.RGJ
+        frmMachineControl.ComandoMotor(#13+frmHelmet.lstMotor.Lines[4]+#13) ; // 4 - Move Up MOTOR.RGJ
+        frmMachineControl.ComandoMotor(#13+frmHelmet.lstMotor.Lines[5]+#13) ; // 5 - Move Down MOTOR.RGJ
+        frmMachineControl.ComandoMotor(#13+frmHelmet.lstMotor.Lines[6]+#13) ; // 6 - 1cm Move MOTOR.RGJ
+	frmMachineControl.ComandoMotor(#13+frmHelmet.lstMotor.Lines[7]+#13) ; // 7 - Adjust Move MOTOR.RGJ
+
+var value: word;
+begin
+        cbDIn(1, FIRSTPORTA, value);
+        result := value and 4;
+        if result = 4  then
+        begin
+            result := 1;
+        end
+        else
+        begin
+            result := 0;
+        end;
+end;

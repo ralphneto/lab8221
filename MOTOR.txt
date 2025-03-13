@@ -1,0 +1,218 @@
+//Liga o motor
+//frmMachineControl.ComandoMotor(#13'LD3 MN MPI'#13) ;
+ComPort1.WriteStr('MN LD3 A4 V2 D250000 G H- G'#13) ;
+frmMachineControl.ComandoMotor('H'#10) ; //MOTOR.RGJ
+H - Liga Motor
+N - Desliga Motor
+S - Sobe - Girar motor sentido horário por n steps ou até Int2 (habilita motor automaticamnete)
+  D - Desce - Girar motor sentido anti-horário por n steps ou até Int2 (habilita motor automaticamnete)
+
+updownClick
+	//frmMachineControl.ComandoMotor(#13'A4 V4 D376 ST0'#13) ;
+	if button = btNext then
+	begin
+		//frmMachineControl.ComandoMotor(#13'H- G'#13);
+                frmMachineControl.ComandoMotor('S'#10'1074'#10) ; //MOTOR.RGJ
+	end
+		else
+	begin
+		if button = btPrev then
+			begin
+					//frmMachineControl.ComandoMotor(#13'H+ G'#13);
+                                        frmMachineControl.ComandoMotor('D'#10'1074'#10) ; //MOTOR.RGJ
+			end;
+
+	//laltura := Trunc(2083333 * StrToFloat(sAltura)) ;    //aqui
+        laltura := Trunc(107380 * StrToFloat(sAltura)) ;    //aqui	107380:1m c/1600steps/volta 
+									1677812,5 c/25000steps/volta	
+	//sMotor := #13'ST0 S MPA D-' + inttostr( laltura ) + ' G'#13 ;
+        sMotor := 'S'#10 + inttostr(laltura) + #10;
+//	frmMachineControl.ConfigurarMotor( 2, 2, 2083333 );
+	//frmMachineControl.ConfigurarMotor( 300, 10, 1664000 );
+
+	// Mandar motor subir
+	SetStatus('Motor command ('+sMotor+') - Estimated Time:' + floattostr(Trunc((StrToFloat(sAltura) * 8400))));
+	frmMachineControl.ComandoMotor( sMotor ) ; //MOTOR.RGJ
+	frmNovoEnsaio.Delay (Trunc((StrToFloat(sAltura) * 14000))) ;//aqui
+        //frmNovoEnsaio.Delay (Trunc((StrToFloat(sAltura) * 10000))) ;//aqui
+	if (bParar = true) then exit ;
+
+
+	// Desce o motor novamente
+	//frmMachineControl.ComandoMotor(#13'ST0 S MPA D0 G'#13);
+        laltura := Trunc(107380 * StrToFloat(sAltura)) ;    //aqui
+        sMotor := 'D'#10 + inttostr(laltura) + #10;
+	frmMachineControl.ComandoMotor( sMotor ) ; //MOTOR.RGJ
+
+
+	// Desliga novamente o motor
+	//frmMachineControl.ComandoMotor(#13'ST1'#13) ;
+        frmMachineControl.ComandoMotor('H'#10) ; //MOTOR.RGJ
+
+10 MILIMETROS
+===============================================================================}
+procedure TfrmNovoEnsaio.udSpeedClick(Sender: TObject; Button: TUDBtnType);
+begin
+	//frmMachineControl.ComandoMotor(#13'A4 V4 D376 ST0'#13) ;
+	//frmMachineControl.ComandoMotor(#13'A300 V10 D16640 ST0'#13) ;
+	if button = btNext then
+	begin
+		frmMachineControl.ComandoMotor('S'#10'1074'#10); //MOTOR.RGJ
+	end
+		else
+	begin
+		if button = btPrev then
+			begin
+			 frmMachineControl.ComandoMotor('D'#10'1074'#10); //MOTOR.RGJ
+			end;
+
+
+
+PARAR
+===============================================================================}
+procedure TfrmNovoEnsaio.Button2Click(Sender: TObject);
+begin
+	//frmMachineControl.ComandoMotor(#13'S ST1'#13) ;
+        frmMachineControl.ComandoMotor('H'#10) ; //MOTOR.RGJ
+
+
+DESCER O SUPORTE
+===============================================================================}
+procedure TfrmNovoEnsaio.btnDescerClick(Sender: TObject);
+var laltura : longint   ;
+    sMotor: string;
+begin
+	// Desce o suporte
+	//frmMachineControl.ComandoMotor(#13'ST0 D0 G'#13) ;
+        laltura := Trunc(107380 * StrToFloat(sAltura)) ;    //aqui
+        sMotor := 'D'#10 + inttostr(laltura) + #10;
+	// Mandar motor DESCER
+	frmMachineControl.ComandoMotor( sMotor ) ; //MOTOR.RGJ
+
+
+procedure TfrmNovoEnsaio.btnCancelClick(Sender: TObject);
+begin
+    nbPages.PageIndex := 0 ;
+    MTimeout := 30;
+    lbRest.Caption := '30';
+    tmrDanger.Enabled := false ;
+	//frmMAchineControl.ComandoMotor(#13'ST1'#13);
+    frmMachineControl.ComandoMotor('N'#10); //MOTOR.RGJ
+
+
+procedure TfrmNovoEnsaio.tmrDangerTimer(Sender: TObject);
+begin
+	Dec( MTimeout ) ;
+	if MTimeout > 10 then	lbRest.Font.Color := clBlue
+	else
+	lbRest.Font.Color := clRed ;
+
+	lbRest.Caption := inttostr(MTimeout) ;
+	if MTimeout = 0 then
+	begin
+		tmrDanger.enabled := false ;
+		lbRest.Font.color := clBlue ;
+		lbRest.Caption := '30' ;
+		//frmMachineControl.ComandoMotor(#13'ST1'#13) ;
+                frmMachineControl.ComandoMotor('N'#10); //MOTOR.RGJ
+
+
+procedure TfrmNovoEnsaio.btnSobeMouseDown(Sender: TObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+	//frmMachineControl.ComandoMotor(#13'A4 V4 D2083333 ST0'#13) ;
+	//frmMachineControl.ComandoMotor(#13'A50 V8 D1664000 ST0'#13) ;
+	//frmMachineControl.ComandoMotor(#13'H- G'#13);
+        frmMachineControl.ComandoMotor('S'#10'350000'#10); //MOTOR.RGJ
+end;
+
+procedure TfrmNovoEnsaio.btnSobeMouseUp(Sender: TObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin 
+	//frmMachineControl.ComandoMotor(#13'S'#13) ;
+        cbDBitOut(1, FIRSTPORTA, 23, 1);	BARBARIDADES
+        frmMachineControl.Delay(200);
+        cbDBitOut(1, FIRSTPORTA, 23, 0);
+end;
+
+procedure TfrmNovoEnsaio.btnDesceMouseDown(Sender: TObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+	//frmMachineControl.ComandoMotor(#13'A4 V4 D2083333 ST0'#13) ;
+	//frmMachineControl.ComandoMotor(#13'A50 V8 D1664000 ST0'#13) ;
+	//frmMachineControl.ComandoMotor(#13'H+ G'#13);
+        frmMachineControl.ComandoMotor('D'#10'350000'#10); //MOTOR.RGJ
+end;
+
+procedure TfrmNovoEnsaio.btnDesceMouseUp(Sender: TObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+	//frmMachineControl.ComandoMotor(#13'S'#13);
+        cbDBitOut(1, FIRSTPORTA, 23, 1);;	BARBARIDADES
+        frmMachineControl.Delay(200);
+        cbDBitOut(1, FIRSTPORTA, 23, 0);
+end;
+
+
+procedure TfrmNovoEnsaio.SpeedButton1Click(Sender: TObject);
+begin
+	//frmMachineControl.ComandoMotor(#13'A50 V1 D1664 ST0'#13) ;
+	//frmMachineControl.ComandoMotor(#13'H- G'#13);
+        frmMachineControl.ComandoMotor('S'#10'1074'#10); //MOTOR.RGJ
+end;
+
+procedure TfrmNovoEnsaio.SpeedButton2Click(Sender: TObject);
+begin
+	//frmMachineControl.ComandoMotor(#13'A50 V1 D1664 ST0'#13) ;
+        //frmMachineControl.ComandoMotor(#13'H+ G'#13);
+        frmMachineControl.ComandoMotor('D'#10'1074'#10); //MOTOR.RGJ
+end;
+
+procedure TfrmNovoEnsaio.tmrDesligaMotorTimer(Sender: TObject);
+begin
+        frmMachineControl.ComandoMotor('N'#10); //MOTOR.RGJ
+        tmrDesligaMotor.Enabled := false;
+end;
+
+
+procedure TfrmDiagnostico.btnSobeMouseUp(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+        frmMachineControl.ComandoMotor(#13'S'#13) ; //MOTOR.RGJ
+end;
+
+
+procedure TfrmDiagnostico.btnSobeMouseDown(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+	//ComandoMotor(#13'A4 V4 D2083333 ST0'#13) ;
+	//ComandoMotor(#13'A50 V8 D1664000 ST0'#13) ;
+        //ComandoMotor(#13'H- G'#13);
+        //frmMachineControl.ComandoMotor('S'#10'350000'#10);
+	//ComandoMotor(#13'S'#13) ;
+	frmMachineControl.ComandoMotor(#13'A4 V4 D2083333'#13) ; //MOTOR.RGJ
+	//frmMachineControl.ComandoMotor(#13'A50 V8 D1664000 ST0'#13) ;
+        frmMachineControl.ComandoMotor(#13'H- G'#13); //MOTOR.RGJ
+
+procedure TfrmDiagnostico.SpeedButton2Click(Sender: TObject);
+var cmd: string;
+    aux: longint;
+begin
+     if CheckBox1.Checked Then
+          aux := StrToInt(Edit2.Text)
+     else
+          aux := StrToInt(Edit1.Text) * 100;
+     cmd := #13+'A4 V4 D' + IntToStr(aux) + ' ST0' + #13;
+     //ComandoMotor(cmd) ;
+     //ComandoMotor(#13'H+ G'#13);
+     frmMachineControl.ComandoMotor('S'#10+inttostr(aux)+#10); //MOTOR.RGJ
+
+
+
+procedure TfrmDiagnostico.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+     timer1.enabled := false;
+     //ComandoMotor(#13'ST1'#13);
+     frmMachineControl.ComandoMotor('N'#10); //MOTOR.RGJ
+     frmMachineControl.Delay(1000);	PORQUE????
+end;

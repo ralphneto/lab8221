@@ -1,0 +1,279 @@
+unit uMachineControl;
+
+
+interface
+
+
+uses
+	Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+	OleCtrls, ExtCtrls, Cbw32, IniFiles, VSSComm32;
+
+
+type
+	TfrmMachineControl = class(TForm)
+		Comm  : TVSSComm32;
+		procedure FormCreate(Sender: TObject);
+		procedure FormDestroy(Sender: TObject);
+	private
+		{ Private declarations }
+	public
+		procedure AbrirPorta;
+		procedure FecharPorta;
+		procedure IncharAmortecedor;
+		procedure AbrirGarra;
+		function	SensorSuperiorOK: boolean;
+		function	SensorInferiorOK:	boolean;
+		procedure ConfigurarMotor( iAceleracao, iVelocidade, iDistancia: longint );
+		procedure ConfigurarAjusteFinoMotor( iAceleracao, iVelocidade,
+																				 iDistancia: longint );
+		procedure ComandoMotor(sComando: string) ;
+		procedure Delay (iMSecs: integer);
+
+		end;
+
+
+const
+	iBoardNum	:	integer	=	0;
+
+
+var
+	frmMachineControl	: TfrmMachineControl;
+	sAcFino,                	// Aceleracao do ajuste fino
+	sDsFino,									// Distancia do ajuste fino
+	sVlFino,									// Velocidade do ajuste fino
+	sAcNormal,								// Aceleracao do ajuste fino
+	sDsNormal,								// Distancia do ajuste fino
+	sVlNormal			:	string;	  // Velocidade do ajuste fino
+
+
+implementation
+
+
+uses uMisc;
+
+
+{$R *.DFM}
+
+
+{===============================================================================
+
+===============================================================================}
+procedure TfrmMachineControl.Delay (iMSecs: integer);
+var
+	lFirstTickCount	: longint;
+begin
+	lFirstTickCount := GetTickCount;
+	repeat
+		Application.ProcessMessages ;
+	until ((GetTickCount - lFirstTickCount) >= longint(iMSecs));
+end;
+
+
+{===============================================================================
+
+===============================================================================}
+procedure TfrmMachineControl.FormCreate(Sender: TObject);
+var
+	fsRevision	:	single;
+	iErrReport	:	integer;
+	iErrHandle	:	integer;
+	ifMotor			:	TIniFile;
+begin
+	fsRevision := CURRENTREVNUM;
+	cbDeclareRevision(fsRevision);
+	iErrReport := PRINTALL;
+	iErrHandle := STOPALL;
+	cbErrHandling(iErrReport, iErrHandle);
+
+	ifMotor := TIniFile.Create(sAppPath+'MOTOR.INI');
+	Comm.CommPort := TCommPort(strtoint(ifMotor.ReadString('Comm', 'Serial_Port', '0')));
+
+	sAcFino := ifMotor.ReadString('Adjust_Settings', 'Aceleration', '30');
+	sDsFino := ifMotor.ReadString('Adjust_Settings', 'Distance', '2083');
+	sVlFino := ifMotor.ReadString('Adjust_Settings', 'Velocity', '50');
+
+	sAcNormal := ifMotor.ReadString('Normal_Settings', 'Aceleration', '2.5');
+	sDsNormal := ifMotor.ReadString('Normal_Settings', 'Distance', '2083333');
+	sVlNormal := ifMotor.ReadString('Normal_Settings', 'Velocity', '12.5');
+
+	ifMotor.Free;
+end;
+
+
+{===============================================================================
+
+===============================================================================}
+procedure TfrmMachineControl.FormDestroy(Sender: TObject);
+var
+	ifMotor		:	TIniFile;
+begin
+	ifMotor := TIniFile.Create(sAppPath+'MOTOR.INI');
+	ifMotor.WriteString('Adjust_Settings', 'Acceleration', sAcFino);
+	ifMotor.WriteString('Adjust_Settings', 'Distance', sDsFino);
+	ifMotor.WriteString('Adjust_Settings', 'Velocity', sVlFino);
+	ifMotor.WriteString('Normal_Settings', 'Acceleration', sAcNormal);
+	ifMotor.WriteString('Normal_Settings', 'Distance', sDsNormal);
+	ifMotor.WriteString('Normal_Settings', 'Velocity', sVlNormal);
+	ifMotor.Free;
+	Comm.StopComm;
+end;
+
+
+{===============================================================================
+
+===============================================================================}
+procedure TfrmMachineControl.AbrirPorta;
+var
+	iBit			:	integer;
+	iPortType	:	integer;
+	iBitSet		:	integer;
+begin
+	iPortType := AUXPORT;
+	iBit := 0;
+	iBitSet := 0;
+	cbDBitOut (iBoardNum, iPortType, iBit, iBitSet);
+	repeat
+		cbDBitIn(iBoardNum, iPortType, iBit, iBitSet);
+	until (iBitSet=0);
+end;
+
+
+{===============================================================================
+
+===============================================================================}
+procedure TfrmMachineControl.FecharPorta;
+var
+	iBit			:	integer;
+  iPortType	:	integer;
+  iBitSet		:	integer;
+begin
+	iPortType := AUXPORT;
+	iBit := 0;
+  iBitSet := 1;
+	cbDBitOut (iBoardNum, iPortType, iBit, iBitSet);
+  repeat
+  	cbDBitIn(iBoardNum, iPortType, iBit, iBitSet);
+  until (iBitSet=1);
+end;
+
+
+{===============================================================================
+
+===============================================================================}
+procedure TfrmMachineControl.IncharAmortecedor;
+var
+	iBit			:	integer;
+  iPortType	:	integer;
+  iBitSet		:	integer;
+begin
+	iPortType := AUXPORT;
+  iBit := 2;
+  iBitSet := 1;
+	cbDBitOut (iBoardNum, iPortType, iBit, iBitSet);
+  iBitSet := 0;
+  delay(1000);
+  cbDBitOut (iBoardNum, iPortType, iBit, iBitSet);
+end;
+
+
+{===============================================================================
+
+===============================================================================}
+procedure TfrmMachineControl.AbrirGarra;
+var
+	iBit			:	integer;
+  iPortType	:	integer;
+  iBitSet		:	integer;
+begin
+	iPortType := AUXPORT;
+  iBit := 1;
+  iBitSet := 1;
+	cbDBitOut (iBoardNum, iPortType, iBit, iBitSet);
+end;
+
+
+{===============================================================================
+
+===============================================================================}
+function TfrmMachineControl.SensorSuperiorOK: boolean;
+var
+	iBit			:	integer;
+  iPortType	:	integer;
+	iBitSet		:	integer;
+begin
+	iPortType := AUXPORT;
+  iBit := 2;
+  iBitSet := 0;
+	cbDBitIn (iBoardNum, iPortType, iBit, iBitSet);
+  Result := iBitSet<>1;
+end;
+
+
+{===============================================================================
+
+===============================================================================}
+function TfrmMachineControl.SensorInferiorOK: boolean;
+var
+	iBit			:	integer;
+	iPortType	:	integer;
+	iBitSet		:	integer;
+begin
+	iPortType := AUXPORT;
+	iBit := 1;
+	iBitSet := 0;
+	cbDBitIn (iBoardNum, iPortType, iBit, iBitSet);
+	Result := iBitSet<>1;
+end;
+
+
+{===============================================================================
+
+==============================================================================}
+procedure TfrmMachineControl.ConfigurarMotor( iAceleracao, iVelocidade,
+	iDistancia: longint );
+var
+	sTemp		:	string;
+begin
+	sAcNormal := inttostr(iAceleracao);
+	sVlNormal := inttostr(iVelocidade);
+	sDsNormal := inttostr(iDistancia);
+	sTemp := 'MN LD3 A' + IntToStr(iAceleracao) + ' V' + IntToStr(iVelocidade) +
+	         ' D' + IntToStr(iDistancia) + #13;
+	Comm.WriteCommData(PChar(sTemp), Length(sTemp));
+end;
+
+
+{===============================================================================
+
+==============================================================================}
+procedure TfrmMachineControl.ConfigurarAjusteFinoMotor( iAceleracao,
+	iVelocidade, iDistancia: longint );
+var
+	sTemp		:	string;
+begin
+	sAcFino := inttostr(iAceleracao);
+	sVlFino := inttostr(iVelocidade);
+	sDsFino := inttostr(iDistancia) ;
+	sTemp := 'MN LD3 A' + IntToStr(iAceleracao) + ' V' + IntToStr(iVelocidade) +
+					 ' D' + IntToStr(iDistancia) + #13;
+	Comm.WriteCommData(PChar(sTemp), Length(sTemp));
+end;
+
+
+{===============================================================================
+
+===============================================================================}
+procedure TfrmMachineControl.ComandoMotor(sComando: string);
+var
+	sTemp	:	string;
+begin
+	sTemp := sComando;
+	Comm.WriteCommData(PChar(sTemp), Length(sTemp));
+end;
+
+
+{===============================================================================
+
+===============================================================================}
+
+end.

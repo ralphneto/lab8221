@@ -1,0 +1,1808 @@
+unit uNovoEnsaio;
+
+interface
+
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  StdCtrls, Buttons, ExtCtrls, ComCtrls, Spin, Cbw32, Ports, VSSComm32, Db,
+  DBTables, Mask, DBCtrls;
+
+
+type
+	TfrmNovoEnsaio = class(TForm)
+		nbPages: TNotebook;
+		lbTipoEnsaio: TLabel;
+		btnImpacto: TButton;
+		btnPerfuracao: TButton;
+
+		btnResistenciaViseira: TButton;
+		lbEmpresa: TLabel;
+		lbModeloCapacete: TLabel;
+		lbNumeroAmostra: TLabel;
+		lbNumeroLote: TLabel;
+		lbPosicaoEnsaio: TLabel;
+		lbNormaUtilizar: TLabel;
+		cbEmpresa: TComboBox;
+		cbModeloCapacete: TComboBox;
+		edNumeroAmostra: TEdit;
+		edNumeroLote: TEdit;
+		cbNormaUtilizar: TComboBox;
+		btnFormularioGeralContinuar: TButton;
+		lbAjusteCapacete: TLabel;
+		lbFecharPorta: TLabel;
+		btnFecharPorta: TButton;
+		updown: TUpDown;
+		tgarra: TTimer;
+		edUpDown: TEdit;
+		Button1: TButton;
+		tmrParar: TTimer;
+		btFinalizar1: TButton;
+		Label1: TLabel;
+		Label2: TLabel;
+		Button2: TButton;
+		Label4: TLabel;
+		btnDescer: TButton;
+		btnDescerAbrir: TButton;
+		btnAbrir: TButton;
+		Button3: TButton;
+		Button4: TButton;
+		Label5: TLabel;
+		Button5: TButton;
+		Label6: TLabel;
+		Label7: TLabel;
+		Button6: TButton;
+		Label8: TLabel;
+		Button7: TButton;
+		btnCintaJugular: TButton;
+		Label9: TLabel;
+		Button8: TButton;
+		Label10: TLabel;
+		Button9: TButton;
+		edCondicionamento: TComboBox;
+		edPosicaoEnsaio: TComboBox;
+		btnCancel: TButton;
+		Button10: TButton;
+		Button12: TButton;
+		Button11: TButton;
+		Button13: TButton;
+		Button14: TButton;
+		Button15: TButton;
+		tmrDanger: TTimer;
+		lbRest: TLabel;
+		Label11: TLabel;
+		btnFecharPorta2: TButton;
+		btnFecharPorta3: TButton;
+		//Porta_1: TPorts;
+		//Regua: TVSSComm32;
+		Button16: TButton;
+		tmrLeitura: TTimer;
+		Status: TStatusBar;
+    Table1: TTable;
+	tbNum: TDBEdit;
+    tbTam: TDBEdit;
+    tbCon: TDBEdit;
+    tbPos: TDBEdit;
+    tbVel: TDBEdit;
+    tbMax: TDBEdit;
+    tb1Lm: TDBEdit;
+    tb2Lm: TDBEdit;
+    DataSource1: TDataSource;
+		Label12: TLabel;
+    edTamanho: TEdit;
+    Porta_1: TPorts;
+    timerP: TTimer;
+    lbCount: TLabel;
+    lbDin: TLabel;
+    lbRes: TLabel;
+    btnCC: TSpeedButton;
+    tmrPerf: TTimer;
+    lbIni: TLabel;
+    edRPos: TLabel;
+    btnSobe: TSpeedButton;
+    btnDesce: TSpeedButton;
+    tbModel: TDBEdit;
+		procedure FormShow(Sender: TObject);
+		procedure btnImpactoClick(Sender: TObject);
+		procedure btnPerfuracaoClick(Sender: TObject);
+		procedure btnResistenciaViseiraClick(Sender: TObject);
+		procedure btnFormularioGeralContinuarClick(Sender: TObject);
+		procedure updownClick(Sender: TObject; Button: TUDBtnType);
+		procedure Button1Click(Sender: TObject);
+		procedure btnFecharPortaClick(Sender: TObject);
+		procedure btnFecharPorta1Click(Sender: TObject);
+		procedure tgarraTimer(Sender: TObject);
+		procedure FormCreate(Sender: TObject);
+		procedure btFinalizar1Click(Sender: TObject);
+		procedure btFinalizar2Click(Sender: TObject);
+		procedure udSpeedClick(Sender: TObject; Button: TUDBtnType);
+		procedure Button2Click(Sender: TObject);
+		procedure GetNormaValues ;
+		procedure WriteMainPage ;
+		procedure Delay (iMSecs: integer);
+        procedure DelayRegua (iMSecs: integer);
+		procedure btnDescerClick(Sender: TObject);
+		procedure btnDescerAbrirClick(Sender: TObject);
+		procedure btnAbrirClick(Sender: TObject);
+		procedure Button3Click(Sender: TObject);
+		procedure Button4Click(Sender: TObject);
+		procedure Zoom(PicoMaximo : double ; PosicaoX : LongInt) ;
+		procedure Button5Click(Sender: TObject);
+		//procedure ReguaReceiveData(Buffer: Pointer; BufferLength: Word);
+		procedure Button6Click(Sender: TObject);
+		procedure Button7Click(Sender: TObject);
+		procedure btnCintaJugularClick(Sender: TObject);
+		procedure GetNCintaValues ;
+		procedure GetNViseiraValues ;
+		procedure GetNPerfValues ;
+		procedure Button8Click(Sender: TObject);
+		procedure Button9Click(Sender: TObject);
+		procedure btnCancelClick(Sender: TObject);
+		procedure Button10Click(Sender: TObject);
+		procedure Button12Click(Sender: TObject);
+		procedure Button11Click(Sender: TObject);
+		procedure tmrDangerTimer(Sender: TObject);
+		procedure btnFecharPorta2Click(Sender: TObject);
+		procedure btnFecharPorta3Click(Sender: TObject);
+		function  ReadForward : byte ;
+		function  ReadAbsolute : byte ;
+		function  CheckOD : boolean ;
+		procedure ResetOD ;
+		procedure Button16Click(Sender: TObject);
+		procedure FormClose(Sender: TObject; var Action: TCloseAction);
+		procedure tmrLeituraTimer(Sender: TObject);
+		procedure tmrPararTimer(Sender: TObject);
+		procedure SetStatus(str : string);
+				procedure GetCombos;
+    procedure timerPTimer(Sender: TObject);
+    procedure btnCCClick(Sender: TObject);
+    procedure tmrPerfTimer(Sender: TObject);
+    procedure btnSobeMouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure btnSobeMouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure btnDesceMouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure btnDesceMouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+	private
+		{ Private declarations }
+	public
+		_1stPerf : boolean;
+		ADData		: array[0..30000] of word ; //RateChange
+		iImpactos : integer ;
+		PosicaoX  : LongInt ;
+		dMax			: double 	;
+		sResVel 	: string  ;
+		vel 			: double ;
+		sVeloc  	: string  ;
+		sVeloc2   : string	;
+		sVeloc3		: string	;
+		AcelX			: extended ;
+		AcelY     : extended ;
+		AcelZ     : extended ;
+		valObs    : string;
+	end;
+
+
+var
+	// t = (Rate * (HighChan-LowChan)) / Count
+    GlobalReads : array[1..2000000] of byte;
+    GRIndex : longint;
+	sEnsaio : string ;
+	frmNovoEnsaio	: TfrmNovoEnsaio;
+	//iOldPos				:	integer;
+	MemHandle			: integer;
+	//sReg    	: string	;
+	//STempo 		: string  ;
+	sAcelMax, //sNumImpactos,
+	sType, sType2, sType3,
+	sAltura , sAltura2,sAltura3,
+	sTAlt1, sTAlt2, sTAlt3,
+	sLimite1,	sLimite2, sAltSens,
+	sTlimite1, sTLimite2 : string ; // Valores da norma de Impacto
+	sCEst, sCDin : string ;					// Valores da norma de Cinta
+	sVDin : string ;								// Valores da norma de Viseira
+	sVno : string ;
+	iVno : integer ;
+	iPVezes : integer = 0;
+	sPDin : string;									// Valores da norma de Perfuração
+	sPno : string ;
+	iPno : integer ;
+	bCNC : boolean = false;
+	bCNCmax : boolean = false ;
+	bCNCGlobal : boolean = true ;
+	Tinv : boolean = false ;
+	bParar : boolean = false ;
+	dVlup, dVldn : double ;
+	Pzero, Pelast, Pplast : byte ;
+	CPzero, CPelast, CPplast : byte ; //, PTemp : currency;
+	espera : bool ;
+	PCNC : bool = true;
+	GlobalPicked :  bool = false;
+	MTimeout : integer = 30; //timeout ajuste fino motor.
+	parcial  : boolean = true ;
+	tmpP : byte = 0;
+    StopTimerP : boolean = false;
+	bCD : boolean = false;
+
+const
+	FirstPoint : LongInt = 0 ;
+	LowChan	   : Integer = 0 ;
+	HighChan   : Integer = 2 ;
+	Count	   : Integer = 30000 ; // RateChange
+	Rate	   : LongInt = 10000 ; // Setar p/ (30000-45000) leituras por segundo RateChange
+	Range	   : Integer = BIP5VOLTS  ;
+	Options	   : Integer = BACKGROUND ;
+	LPTControl : word = $0280 ;
+	LPTAddress : word = $0278 ;
+
+
+	implementation
+
+
+uses uNormas, uCapacetes, uEmpresas, uMachineControl, uGrafico,
+	uHelmet, uImpactoPrint, uResultados, uNormaImpacto, uPerfRes, uMisc,
+	uPerfPrint, uCintaRes, uCintaPrint, uPos, uCondicionamento, uInvalid, uAtrito, uGeral, uP ;
+
+{$R *.DFM}
+
+{===============================================================================
+  DELAY DELAY DELAY DELAY DELAY DELAY DELAY DELAY DELAY DELAY DELAY DELAY DELAY
+===============================================================================}
+procedure TfrmNovoEnsaio.Delay (iMSecs: integer);
+var
+	lFirstTickCount	: longint;
+begin
+	lFirstTickCount := GetTickCount;
+	repeat
+		Application.ProcessMessages ;
+	until ((GetTickCount - lFirstTickCount) >= longint(iMSecs));
+end;
+
+procedure TfrmNovoEnsaio.DelayRegua (iMSecs: integer);
+var
+	lFirstTickCount	: longint;
+begin
+	lFirstTickCount := GetTickCount;
+	repeat
+	until ((GetTickCount - lFirstTickCount) >= longint(iMSecs));
+end;
+
+
+
+{===============================================================================
+	FORMCREATE FORMCREATE FORMCREATE FORMCREATE FORMCREATE FORMCREATE
+===============================================================================}
+procedure TfrmNovoEnsaio.FormCreate(Sender : TObject);
+begin
+	//cbDBitOut(0, AUXPORT, 0, 1); // Porta
+	cbDBitOut(0, AUXPORT, 1, 1); // Garra
+	frmMachineControl.ComandoMotor(#13'ST1'#13) ;
+	_1stPerf := true;
+        nbPages.PageIndex := 0;
+	//Depois de 4 segundos o frmHelmet.timer1 envia 0,AUX,2,0 e desliga motor.
+end;
+
+
+{===============================================================================
+    FORMSHOW FORMSHOW FORMSHOW FORMSHOW FORMSHOW FORMSHOW FORMSHOW FORMSHOW
+===============================================================================}
+procedure TfrmNovoEnsaio.FormShow(Sender: TObject);
+begin
+		GetCombos;
+end;
+
+
+{===============================================================================
+	IMPACTOCLICK IMPACTOCLICK IMPACTOCLICK IMPACTOCLICK IMPACTOCLICK
+===============================================================================}
+procedure TfrmNovoEnsaio.btnImpactoClick(Sender: TObject);
+var
+	iItem	:	integer;
+begin
+	sEnsaio := 'IMPACTO' ;
+	tmrParar.enabled := false ;
+	cbNormaUtilizar.Items.Clear;
+	if frmNormas.lvNormasImpacto.Items.Count=0 then
+    begin
+    	ShowMessage('Não existem normas cadastradas para ensaio de impacto!');
+			Exit;
+    end;
+
+	for iItem := 0 to frmNormas.lvNormasImpacto.Items.Count-1 do
+		cbNormaUtilizar.Items.Add(frmNormas.lvNormasImpacto.Items.Item[iItem].Caption);
+	try
+		frmMachineControl.Comm.StopComm ;
+		frmMachineControl.Comm.StartComm ;
+	except
+		ShowMessage( 'Erro ao abrir porta serial para o motor'#13 +
+								 'Verifique se a porta configurada (MOTOR.INI) está correta.' );
+		exit ;
+	end;
+	nbPages.PageIndex := 1;
+end;
+
+
+{===============================================================================
+	PERFURACAOCLICK PERFURACAOCLICK PERFURACAOCLICK PERFURACAOCLICK
+===============================================================================}
+procedure TfrmNovoEnsaio.btnPerfuracaoClick(Sender: TObject);
+var iItem	:	integer;
+begin
+	sEnsaio := 'PERFURACAO' ;
+
+	cbNormaUtilizar.Items.Clear;
+	if frmNormas.lvNormasPerfuracao.Items.Count=0 then
+      begin
+				ShowMessage('Não há nenhuma norma cadastrada para este ensaio.');
+       	Exit;
+      end;
+	for iItem:=0 to frmNormas.lvNormasPerfuracao.Items.Count-1 do
+		cbNormaUtilizar.Items.Add(
+			frmNormas.lvNormasPerfuracao.Items.Item[iItem].Caption
+			);
+	nbPages.PageIndex := 1;
+end;
+
+
+{===============================================================================
+	VISEIRACLICK VISEIRACLICK VISEIRACLICK VISEIRACLICK VISEIRACLICK
+===============================================================================}
+procedure TfrmNovoEnsaio.btnResistenciaViseiraClick(Sender: TObject);
+var
+	iItem	:	integer;
+begin
+	sEnsaio := 'VISEIRA' ;
+	cbNormaUtilizar.Items.Clear;
+	if frmNormas.lvNormasViseira.Items.Count=0 then
+		begin
+			ShowMessage('Não há nenhuma norma cadastrada para este ensaio.');
+			Exit;
+		end;
+	for iItem:=0 to frmNormas.lvNormasViseira.Items.Count-1 do
+		cbNormaUtilizar.Items.Add(
+			frmNormas.lvNormasViseira.Items.Item[iItem].Caption
+			);
+	nbPages.PageIndex := 1;
+end;
+
+
+{===============================================================================
+	FORMULARIOGERALCONTINUARCLICK FORMULARIOGERALCONTINUARCLICK
+===============================================================================}
+procedure TfrmNovoEnsaio.btnFormularioGeralContinuarClick(Sender: TObject);
+var iNormasCount : integer ;
+	mbox : string;
+begin
+	if cbNormaUtilizar.Text='' then
+		ShowMessage('Alguma norma deve ser escolhida')
+	else
+	begin
+		if sEnsaio = 'IMPACTO' then
+		begin
+			valObs := InputBox('Observação', 'Preencha o campo "observação" se desejado:', '');
+			for iNormasCount := 0 to (frmNormas.lvNormasImpacto.Items.Count-1) do
+			begin
+				if cbNormaUtilizar.text = frmNormas.lvNormasImpacto.Items.Item[(iNormasCount)].caption then
+				begin
+					frmHelmet.NormaAtual := iNormasCount ;
+					GetNormaValues ;
+				end;
+			end;
+			WriteMainPage ;
+			frmMachineControl.ComandoMotor(#13'LD3 MN MPI'#13) ;
+			MTimeout := 120 ;
+			tmrDanger.enabled := true ;
+			nbPages.PageIndex := 2;
+		end;
+
+		if sEnsaio = 'VISEIRA' then
+		begin
+			for iNormasCount := 0 to (frmNormas.lvNormasViseira.Items.Count-1) do
+				begin
+				if cbNormaUtilizar.text = frmNormas.lvNormasViseira.Items.Item[(iNormasCount)].caption then
+					begin
+						frmHelmet.NormaAtual := iNormasCount ;
+						GetNViseiraValues ;
+					end;
+				end;
+				ResetOD;
+		if (frmP.cbAlways.Enabled = true or _1stPerf = true) then
+		begin
+			tmrPerf.enabled := true;
+			nbPages.PageIndex := 6;
+		end else nbPages.PageIndex := 7;
+		end;
+
+		if sEnsaio = 'PERFURACAO' then
+		begin
+			for iNormasCount := 0 to (frmNormas.lvNormasPerfuracao.Items.Count-1) do
+			begin
+				if cbNormaUtilizar.text = frmNormas.lvNormasPerfuracao.Items.Item[(iNormasCount)].caption then
+					begin
+						frmHelmet.NormaAtual := iNormasCount ;
+						GetNPerfValues ;
+					end;
+			end;
+			ResetOD;
+
+            if _1stPerf=true then
+            begin
+                tmrPerf.enabled:=true;
+	            nbPages.PageIndex:=6;
+            end else
+            begin
+            	mbox:=('Deseja manter a posição inicial anterior?'+#13#10+'>>'+inttostr(Pzero)+#13#10+'Obs: Obrigatório se houve troca de cabeça.');
+            	if ID_YES=Application.MessageBox(PChar(mbox), 'Posição inicial', mb_applmodal+mb_iconquestion+mb_yesno+mb_defbutton1) then
+                nbPages.PageIndex := 7 else nbPages.PageIndex := 6;
+            end;
+
+		//if (frmP.cbAlways.Enabled = true or _1stPerf = true) then
+		//begin
+		//	tmrPerf.enabled := true;
+		//	nbPages.PageIndex := 6;
+		//end else nbPages.PageIndex := 7;
+		end;
+
+		if sEnsaio = 'CINTA' then
+		begin
+			for iNormasCount := 0 to (frmNormas.lvNormasCinta.Items.Count-1) do
+			begin
+				if cbNormaUtilizar.text = frmNormas.lvNormasCinta.Items.Item[(iNormasCount)].caption then
+					begin
+						frmHelmet.NormaAtual := iNormasCount ;
+						GetNCintaValues ;
+					end;
+			end;
+			tmrLeitura.enabled := true ;
+			nbPages.PageIndex := 9;
+		end;
+	end;
+end;
+
+
+{===============================================================================
+	UPDOWNCLICK UPDOWNCLICK UPDOWNCLICK UPDOWNCLICK UPDOWNCLICK UPDOWNCLICK
+===============================================================================}
+procedure TfrmNovoEnsaio.updownClick(Sender: TObject; Button: TUDBtnType);
+begin
+	frmMachineControl.ComandoMotor(#13'A50 V1 D2083 ST0'#13) ;
+	if button = btNext then
+	begin
+		frmMachineControl.ComandoMotor(#13'H- G'#13);
+	end
+		else
+	begin
+		if button = btPrev then
+			begin
+					frmMachineControl.ComandoMotor(#13'H+ G'#13);
+			end;
+	end;
+
+end;
+
+
+{===============================================================================
+	ABRIRPORTACLICK ABRIRPORTACLICK ABRIRPORTACLICK ABRIRPORTACLICK
+===============================================================================}
+procedure TfrmNovoEnsaio.Button1Click(Sender: TObject);
+begin
+	tmrDanger.Enabled := false ;
+    MTimeout := 30;
+    lbRest.Caption := '30';
+	frmMachineControl.ComandoMotor(#13'ST0 MPA PZ'#13) ;
+	nbPages.PageIndex := 3;
+end;
+
+{===============================================================================
+	FECHARPORTACLICK FECHARPORTACLICK FECHARPORTACLICK FECHARPORTACLICK
+===============================================================================}
+procedure TfrmNovoEnsaio.btnFecharPortaClick(Sender: TObject);
+	var 	iPorta, iGarra  : integer   ;
+			sMotor  : string    ;
+			laltura : longint   ;
+			temp1, temp2 : word ;
+			vezes,x	: integer   ;
+			mili		: extended  ;
+			gx, gy, gz : double ;
+			actual, last, temp : double ;
+			n				: double		;
+			sForm		: string		;
+			iStatus : integer		;
+			iCurIndex : integer ;
+			iCurCount : integer ;
+			iErr			: integer ;
+			ways : integer ;
+
+begin
+	//Inicializa variáveis
+	bParar := False ;
+	x			 := 0			;
+	n 		 := 0 		;
+	temp1  := 65535 ;
+	temp2  := 0 		;
+	vezes  := 0 		;
+	iPorta := 1 		;
+	iGarra := 0			;
+	iStatus := RUNNING ;
+	actual := -500	;
+	ways := 0;
+	MemHandle := cbWinBufAlloc(Count) ;
+			frmNovoEnsaio.btnFecharPorta.Enabled  := false ; //aqui
+			frmNovoEnsaio.btnFecharPorta2.Enabled := false ; //aqui
+			frmNovoEnsaio.btnFecharPorta3.Enabled := false ; //aqui
+	SetStatus('');
+
+	espera := false ;
+	// Reseta operações de background
+	cbStopBackground(0) ;
+
+	// Configura parâmetros do counter
+	cbC8254Config(0, 1, HIGHONLASTCOUNT ) ;
+
+	// Manda Porta fechar
+	//SetStatus('Closing door...');
+	//cbDBitOut( 0, AUXPORT, 0, 0) ;
+
+	// Não prosseguir enquanto não fechar totalmente a porta
+	SetStatus('Waiting for door closed..');
+	while iPorta = 1 do
+	begin
+		Application.ProcessMessages ;
+		cbDBitIn( 0, AUXPORT, 2, iPorta );
+		if (bParar = true) then exit ;
+	end;
+
+    // Libera pistão da corda
+    cbDBitOut(0, AUXPORT, 3, 0);
+
+	// Configura parâmetros para subida do motor
+	SetStatus('Configuring step motor parameters..');
+	laltura := Trunc(2083333 * StrToFloat(sAltura)) ;    //aqui
+	sMotor := #13'ST0 S MPA D-' + inttostr( laltura ) + ' G'#13 ;
+	frmMachineControl.ConfigurarMotor( 300, 10, 2083333 );
+
+	// Mandar motor subir
+	SetStatus('Motor command ('+sMotor+') - Estimated Time:' + floattostr(Trunc((StrToFloat(sAltura) * 8400))));
+	frmMachineControl.ComandoMotor( sMotor ) ;
+	frmNovoEnsaio.Delay (Trunc((StrToFloat(sAltura) * 8400))) ;//aqui
+	if (bParar = true) then exit ;
+
+	// Abrir a garra e esperar desativar sensor
+		// Seta o tempo do timer e habilita
+		tmrParar.Interval :=  5000;
+		tmrParar.enabled := true ;
+	SetStatus('Command Open hook');
+	cbDBitOut( 0, AUXPORT, 1, 0 ) ;
+		// iGarra = 0 --> base nao soltou
+	SetStatus('Waiting for falling support...');
+	while ((iGarra = 0) and (bParar = false)) do //Espera até garra abrir totalmente
+	begin
+		Application.ProcessMessages ;
+		cbDBitIn( 0, AUXPORT, 1, iGarra );
+				Application.ProcessMessages ;
+	end;
+		tmrParar.enabled := false ; // Se nao foi preciso timeout, desliga timer.
+		if (bParar = true) then
+		begin // Sai da funcao e vai para tela de emergencia
+			frmNovoEnsaio.nbPages.PageIndex := 5;
+				frmNovoEnsaio.nbPages.ActivePage := 'Emergência' ;
+				Application.ProcessMessages;
+			exit ;
+		end;
+
+	//Tempo para iniciar a leitura
+	frmNovoEnsaio.Delay(300*(Trunc(StrToFloat(sAltura))));
+	SetStatus('Starting analog reading...');
+	// Habilita o timer que após .5 seg. fecha novamente a garra
+	tgarra.enabled := true ;
+
+	// Desligar o motor
+	sMotor := #13'ST1'#13 ;
+	frmMachineControl.ComandoMotor(sMotor) ;
+
+	// Inicia leitura do acelerômetro
+	iErr := cbAInScan( 0, LowChan, HighChan, Count, Rate, BIP5VOLTS, MemHandle, Options) ;
+	if iErr <> 0 then ShowMessage('Erro inciando leitura analógica') ;
+
+	iErr := cbCLoad(0, LOADREG1, 65535);
+	if iErr <> 0 then ShowMessage('Erro ao carregar sensor de Velocidade.');
+
+	// Entra no Loop de Velocidade
+	SetStatus('Waiting for velocity changing');
+	while temp1 > 65530 do
+	begin
+		cbCin(0, 1,temp1);
+	end;
+
+
+	// Le velocidade
+	SetStatus('Computing velocity..');
+while not ((temp1 = temp2) and (vezes = 5)) do
+ begin
+
+		cbCin(0, 1, temp2);
+		if temp2 < 50 then inc(ways);
+		if temp2 = temp1 then
+			inc(vezes)
+		else
+			begin
+			vezes := 0 ;
+			temp1 := temp2;
+		end;
+ end;
+
+	sform  :=  '######.000' ;
+	mili   := ((65535+(ways*65535)) - temp2) / 1000 ;
+//	mili   := ( (66235 - temp2) / 1.87 ) / 1000 ; // 66235 = 65535 + 700
+	//sReg   := formatfloat(sform , temp2) ;
+	//sTempo := formatfloat(sform , mili) ;
+	vel := ((strtofloat(sAltSens)/1000)/(mili/1000)) ;
+	//vel := (vel * 1.56) + 0.84 ; //0.55 ;
+	// uMisc.SetMotorOff ;
+
+	//dVlup := strtofloat(frmNormaImpacto.edVelSup.Text);//aqui
+	//dVldn := strtofloat(frmNormaImpacto.edVelInf.Text);//aqui
+	SetStatus('Setting result form values..');
+	frmResultados.lbTemp.Font.Color := clLime ;
+	Tinv := false;
+	if not ((vel <= (strtofloat(sVeloc)+dVlup)) and (vel >= (strtofloat(sVeloc)-dVldn))) then
+	begin
+		frmInvalid.Show ;
+		bCNC := false ;
+		Tinv := true;
+		frmResultados.lbTemp.Font.Color := clRed ;
+	end ;
+	sVeloc := formatfloat(sform, vel) ;
+	sResVel := sVeloc ;
+	frmResultados.lbTemp.Caption := sVeloc + ' m/s' ;
+  frmImpactoPrint.stVelReal.Caption := sVeloc + ' m/s' ;
+
+	// Pega valores do acelerômetro na placa
+	setStatus('Getting analog board data...');
+	repeat
+		cbGetStatus( 0, iStatus, iCurCount, iCurIndex ) ;
+	until iStatus = IDLE ;
+
+	cbWinBufToArray(MemHandle, ADData[0], FirstPoint, Count) ;
+
+	// Traça gráfico
+	frmGrafico.lsX.Clear ;
+	frmGrafico.lsY.Clear ;
+	frmGrafico.lsZ.Clear ;
+	frmGrafico.lsLinha.Clear ;
+	SetStatus('Formatting graphic values..');
+	while x < 30000 do // RateChange
+			begin
+				gx := ((ADData[x]   * (10000/(AcelX*4096))) - (20480000/(AcelX*4096))) ;
+				gy := ((ADData[x+1] * (10000/(AcelY*4096))) - (20480000/(AcelY*4096))) ;
+				gz := ((ADData[x+2] * (10000/(AcelZ*4096))) - (20480000/(AcelZ*4096))) ;
+				frmGrafico.lsX.AddXY(n, gx, '', RGB (255,0,0)) ;
+				frmGrafico.lsY.AddXY(n, gy, '', RGB (0,255,0)) ;
+				frmGrafico.lsZ.AddXY(n, gz, '', RGB (255,255,0)) ;
+
+				temp := sqr(gx)+ sqr(gy) + sqr(gz) ;
+				last := sqrt(temp) ;
+				if last > actual then
+				begin
+					actual := last;
+					PosicaoX := Trunc(1 + (( x + 2) / 3 )) ;
+				end;
+				frmGrafico.lsLinha.AddXY (n, last, '', RGB (0, 0, 255));
+				Inc(x, 3);
+				n := (n + strtofloat('0,1')); // Alterar incremento RateChange
+				dmax := actual ;
+			end;
+			frmNovoEnsaio.btnFecharPorta.Enabled := true ;
+	// Exibe resultados
+
+		// Passa para próxima tela
+		SetStatus('End process.');
+		nbPages.PageIndex := 4 ;
+end;
+
+{===============================================================================
+	TGARRATIMER TGARRATIMER TGARRATIMER TGARRATIMER TGARRATIMER TGARRATIMER
+===============================================================================}
+procedure TfrmNovoEnsaio.tgarraTimer(Sender: TObject);
+begin
+	tgarra.enabled := false ;
+	cbDBitOut( 0, AUXPORT, 1, 1) ;
+end;
+
+{===============================================================================
+	FINALIZAR2CLICK FINALIZAR2CLICK FINALIZAR2CLICK FINALIZAR2CLICK
+===============================================================================}
+procedure TfrmNovoEnsaio.btFinalizar2Click(Sender: TObject);
+begin
+	parcial := false ;
+	btFinalizar1Click(Sender);
+end;
+
+{===============================================================================
+	FINALIZAR1CLICK FINALIZAR1CLICK FINALIZAR1CLICK FINALIZAR1CLICK
+===============================================================================}
+procedure TfrmNovoEnsaio.btFinalizar1Click(Sender: TObject);
+	 var dTLim1, dTLim2 : double ;
+			 sdMax : string ;
+             ss100:string;
+begin
+	// Desce o motor novamente
+	frmMachineControl.ComandoMotor(#13'ST0 S MPA D0 G'#13);
+
+	// Abre a porta novamente
+	//cbDBitOut( 0, AUXPORT, 0, 1) ;
+
+    // Desce a corda
+    cbDBitOut(0, AUXPORT, 3, 1);
+
+	// Incrementa quantidade de ensaios efetuados
+	Inc(iImpactos) ;
+	// Se atingiu impactos da norma
+	if parcial = false then // Finalizar Global
+	begin
+	// Seta var GlobalPicked, desabilita continuar, e habilita novo
+		GlobalPicked := true ;
+		frmHelmet.bbContinuarEnsaio.enabled := False ;
+		frmHelmet.bbNovoEnsaio.Enabled := True ;
+	end
+	else
+	begin
+	// Se não atingiu, habilita botão continuar, desab novo
+		GlobalPicked := false ;
+		frmHelmet.bbContinuarEnsaio.enabled := false ;
+		//frmHelmet.bbNovoEnsaio.Enabled := False ;
+	end;
+
+	// Quantidade de ensaios
+	frmResultados.lbEnsaios.Caption := 'Ensaio '+inttostr(iImpactos)+'.';
+
+	// Desaceleração máxima
+	if (dMax >= strtoint(sAcelMax)) then
+	begin
+		bCNCmax := false ;
+		frmResultados.lbMaximo.Font.Color := RGB(255,0,0) ;
+		frmImpactoPrint.stAceleracaoMaxima.Font.Color := RGB(255,0,0) ;
+	end
+	else
+	begin
+		bCNCmax := true ;
+		frmResultados.lbMaximo.Font.Color := RGB(0,255,0) ;
+		frmImpactoPrint.stAceleracaoMaxima.Font.Color := RGB(0,0,255) ;
+	end;
+	sdMax := (floattostr(dMax)) ;
+	Delete(sdMax, 6, 100) ;
+	frmResultados.lbMaximo.caption :=  sdMax + ' g' ;
+	frmImpactoPrint.stAceleracaoMaxima.caption := sdMax + ' g' ;
+
+	// Se pico máximo ultrapassou limite 1
+	if ( dMax >= strtoint(sLimite1)) then
+	begin
+		dTLim1 := frmHelmet.ScanForLimits(strtoint(sLimite1)) ;
+		// Se tempo acima do limite 1 for maior ou igual ao permitido
+		if dTLim1 >= strtoint(sTLimite1) then
+		begin
+			frmResultados.lbTempo1.Font.Color := RGB(255,0,0) ;
+            frmImpactoPrint.stTempoS1.Font.Color := RGB(255,0,0);
+			bCNC := false ;
+		end
+		// Se tempo acima do limite 1 for menor que o permitido
+		else
+		begin
+			frmResultados.lbTempo1.Font.color := RGB(0,255,0) ;
+            frmImpactoPrint.stTempoS1.Font.Color := RGB(0,0,255);
+			bCNC := true ;
+		end ;
+		frmResultados.lbTempo1.caption := floattostr(dTlim1) + ' ms' ;
+		frmImpactoPrint.stTempoS1.Caption := floattostr(dTLim1) + ' ms' ;
+	end
+	// Se máximo não ultrapassou limite 1
+	else
+		begin
+			frmResultados.lbTempo1.caption := '0 ms' ;
+			frmImpactoPrint.stTempoS1.Caption := '0 ms' ;
+    		frmResultados.lbTempo1.Font.color := RGB(0,255,0) ;
+            frmImpactoPrint.Font.Color := RGB(0,0,255);
+			bCNC := true ;
+		end;
+
+	// Se pico máximo ultrapassou limite 2
+	// aqui
+	if frmNormaImpacto.use2nd.checked then
+	begin
+		if (dMax >= strtoint(sLimite2)) then
+		begin
+			// Se tempo acima do limite 2 for maior ou igual ao permitido
+			dTlim2 := frmHelmet.ScanForLimits(strtoint(sLimite2)) ;
+			if dTLim2 >= strtoint(sTLimite2) then
+			begin
+				frmResultados.lbTempo2.Font.Color := RGB(255,0,0) ;
+                frmImpactoPrint.stTempoS2.Font.Color := RGB(255,0,0);
+				bCNC := false ;
+			end // Se tempo acima do limite 2 for menor que o permitido
+			else
+            begin
+            	frmResultados.lbTempo2.Font.color := RGB(0,255,0);
+                frmImpactoPrint.stTempoS2.Font.Color := RGB(0,0,255);
+            end;
+				frmResultados.lbTempo2.caption := floattostr(dTlim2) + ' ms' ;
+				frmImpactoPrint.stTempoS2.Caption := floattostr(dTLim2) + ' ms' ;
+		end
+		else
+        begin
+			frmResultados.lbTempo2.caption := '0 ms' ;
+			frmImpactoPrint.stTempoS2.Caption := '0 ms' ;
+		end;
+    end
+    else
+    begin
+				frmResultados.lbTempo2.Font.Color := RGB(0,255,0);
+        frmImpactoPrint.stTempoS2.Font.Color := clBlack ;
+		frmResultados.lbTempo2.caption := 'Não aplicável' ;
+		frmImpactoPrint.stTempoS2.Caption := 'Não aplicável' ;
+    end;
+
+	// Desliga novamente o motor
+	frmMachineControl.ComandoMotor(#13'ST1'#13) ;
+
+	// Ensaio Atual
+	EnsaioAtual := eaImpacto ;
+
+	// Atualiza resultados individuais
+	begin
+		if ((bCNC and bCNCmax) = true) then
+		begin
+		// Se tudo estiver conforme, Global = conforme
+			frmResultados.lbResult.Font.Color := RGB(0,0,255) ;
+			frmResultados.lbResult.caption := 'CONFORME' ;
+			bCNCGlobal := true ;
+		end
+		else
+		begin
+		// Se não estiver conforme, Global = não conforme
+			if (Tinv = false) then
+			begin
+				frmResultados.lbResult.Font.Color := RGB(255,0,0) ;
+				frmResultados.lbResult.caption := 'NÃO CONFORME' ;
+			end
+			else
+			begin
+				frmResultados.lbResult.Font.Color := RGB(255,0,0) ;
+				frmResultados.lbResult.caption := 'TESTE INVÁLIDO' ;
+			end;
+
+			bCNCGlobal := false ;
+		end ;
+	end ;
+
+	// Adiciona resultado na tabela global
+    table1.tablename := extractfilepath(application.exename)+'HELMET.DB';
+	table1.Active := true;
+	table1.append;
+	tbNum.Text := frmResultados.lbAmostra.Caption;
+    tbModel.Text := frmResultados.lbModelo.Caption;
+	tbTam.Text := edTamanho.Text;
+	tbCon.Text := frmResultados.lbCondicionamento.Caption;
+	tbPos.Text := frmResultados.lbEnsaio.Caption;
+	tbVel.Text := frmResultados.lbTemp.Caption;
+	tbMax.Text := frmResultados.lbMaximo.Caption;
+    ss100 := frmResultados.lbTempo1.Caption;
+    tb1Lm.Text := Copy( frmresultados.lbTempo1.Caption, 0, Length(ss100)-2);
+	//tb1Lm.Text := frmResultados.lbTempo1.Caption; //edTempoPrimLimite.Text;
+	if frmNormaImpacto.use2nd.checked then
+	tb2Lm.Text := frmResultados.edTempoSegLimite.Text else
+	tb2Lm.Text := 'N/A';
+	table1.post;
+	table1.Active := false;
+
+	//Atualiza valores na tela geral
+	frmGeral.mmObs.Lines.Clear;
+	frmGeral.mmObs.Lines.Add(valObs);
+	frmGeral.lbEmpresa.caption := frmResultados.lbEmpresa.Caption;
+	frmGeral.lbModelo.caption := frmresultados.lbModelo.caption;
+	frmGeral.lbNorma.caption := frmResultados.lbNorma.caption;
+
+	// Volta para tela inicial
+	nbPages.ActivePage := 'Tipo';
+	frmNovoEnsaio.Close ;
+	parcial := true ;
+end;
+
+{===============================================================================
+	10 MILIMETROS 10 MILIMETROS 10 MILIMETROS 10 MILIMETROS 10 MILIMETROS
+===============================================================================}
+procedure TfrmNovoEnsaio.udSpeedClick(Sender: TObject; Button: TUDBtnType);
+begin
+	frmMachineControl.ComandoMotor(#13'A300 V10 D20830 ST0'#13) ;
+	if button = btNext then
+	begin
+		frmMachineControl.ComandoMotor(#13'H- G'#13);
+	end
+		else
+	begin
+		if button = btPrev then
+			begin
+			 frmMachineControl.ComandoMotor(#13'H+ G'#13);
+			end;
+	end;
+end;
+
+{===============================================================================
+	PARAR PARAR PARAR PARAR PARAR PARAR PARAR PARAR PARAR PARAR PARAR PARAR
+===============================================================================}
+procedure TfrmNovoEnsaio.Button2Click(Sender: TObject);
+begin
+	frmMachineControl.ComandoMotor(#13'S ST1'#13) ;
+	bParar := True ;
+	frmNovoEnsaio.nbPages.PageIndex := 5 ;
+	frmNovoEnsaio.nbPages.ActivePage := 'Emergência' ;
+end;
+
+{===============================================================================
+	GERAR RESULTADOS GERAR RESULTADOS GERAR RESULTADOS GERAR RESULTADOS
+===============================================================================}
+procedure TfrmNovoEnsaio.WriteMainPage ;
+begin
+		// Atualiza principal tela resultados
+		frmResultados.lbEmpresa.Caption := cbEmpresa.Text ; 								// Empresa
+		frmImpactoPrint.stEmpresa.Caption := cbEmpresa.Text ;
+
+		frmResultados.lbModelo.Caption := cbModeloCapacete.Text ; 					// Modelo
+		frmImpactoPrint.stCapacete.Caption := cbModeloCapacete.Text ;
+
+		frmResultados.lbAmostra.Caption := edNumeroAmostra.Text ; 					// Numero
+		frmImpactoPrint.stAmostra.Caption := edNumeroAmostra.Text ;
+
+		frmResultados.lbLote.Caption := edNumeroLote.Text ; 								// Lote
+		frmImpactoPrint.stLote.Caption := edNumeroLote.Text ;
+
+		frmResultados.lbEnsaio.Caption := edPosicaoEnsaio.Text ; 						// Posicao
+		frmImpactoPrint.stEnsaio.Caption := edPosicaoEnsaio.Text ;
+
+		frmResultados.lbNorma.Caption := cbNormaUtilizar.Text ; 						// Norma
+		frmImpactoPrint.stNormaUtilizada.Caption := cbNormaUtilizar.Text ;
+
+		frmResultados.lbCondicionamento.Caption := edCondicionamento.Text ; // Condicionamento
+		frmImpactoPrint.stCondicionamento.Caption := edCondicionamento.Text ;
+
+		frmResultados.lbTamanho.Caption := edTamanho.Text;  								// Tamanho
+		frmImpactoPrint.stTamanho.Caption := edTamanho.Text;
+end;
+
+{===============================================================================
+	PEGAR VALORES DA NORMA PEGAR VALORES DA NORMA PEGAR VALORES DA NORMA
+===============================================================================}
+procedure TfrmNovoEnsaio.GetNormaValues ;
+begin
+	sTAlt1 := frmNormas.lvNormasImpacto.Items.Item[frmHelmet.NormaAtual].SubItems.Strings[2];
+	sTAlt2 := frmNormas.lvNormasImpacto.Items.Item[frmHelmet.NormaAtual].SubItems.Strings[6];
+	sTAlt3 := frmNormas.lvNormasImpacto.Items.Item[frmHelmet.NormaAtual].SubItems.Strings[10];
+	sAcelMax  := frmNormas.lvNormasImpacto.Items.Item[frmHelmet.NormaAtual].SubItems.Strings[0];
+	sType  := frmNormas.lvNormasImpacto.Items.Item[frmHelmet.NormaAtual].Subitems.Strings[1];
+	sAltura   := frmNormas.lvNormasImpacto.Items.Item[frmHelmet.NormaAtual].Subitems.Strings[4];
+	sVeloc		:= frmNormas.lvNormasImpacto.Items.Item[frmHelmet.NormaAtual].SubItems.Strings[3];
+	sType2 := frmNormas.lvNormasImpacto.Items.Item[frmHelmet.NormaAtual].Subitems.Strings[5];
+	sAltura2  := frmNormas.lvNormasImpacto.Items.Item[frmHelmet.NormaAtual].Subitems.Strings[8];
+	sVeloc2   := frmNormas.lvNormasImpacto.Items.Item[frmHelmet.NormaAtual].Subitems.Strings[7];
+	sType3 := frmNormas.lvNormasImpacto.Items.Item[frmHelmet.NormaAtual].Subitems.Strings[9];
+	sAltura3  := frmNormas.lvNormasImpacto.Items.Item[frmHelmet.NormaAtual].Subitems.Strings[12];
+	sVeloc3   := frmNormas.lvNormasImpacto.Items.Item[frmHelmet.NormaAtual].Subitems.Strings[11];
+	sAltSens  := frmNormas.lvNormasImpacto.Items.Item[frmHelmet.NormaAtual].Subitems.Strings[13];
+	sLimite1  := frmNormas.lvNormasImpacto.Items.Item[frmHelmet.NormaAtual].Subitems.Strings[14];
+	sTlimite1 := frmNormas.lvNormasImpacto.Items.Item[frmHelmet.NormaAtual].Subitems.Strings[15];
+	sLimite2  := frmNormas.lvNormasImpacto.Items.Item[frmHelmet.NormaAtual].Subitems.Strings[16];
+	sTLimite2 := frmNormas.lvNormasImpacto.Items.Item[frmHelmet.NormaAtual].Subitems.Strings[17];
+	dVlup := strtofloat(frmNormas.lvNormasImpacto.Items.Item[frmHelmet.NormaAtual].SubItems.Strings[18]);
+	dVldn := strtofloat(frmNormas.lvNormasImpacto.Items.Item[frmHelmet.NormaAtual].SubItems.Strings[19]);
+
+	btnFecharPorta.caption := sType ;
+	btnFecharPorta2.caption := sType2 ;
+	btnFecharPorta3.caption := sType3 ;
+
+	if ((sAltura ='') or (sVeloc ='')) then btnFecharPorta.enabled := false
+		else btnFecharPorta.enabled := true;
+
+	if ((sAltura2='') or (sVeloc2='')) then btnFecharPorta2.enabled := false
+		else btnFecharPorta2.enabled := true;
+
+	if ((sAltura3='') or (sVeloc3='')) then btnFecharPorta3.enabled := false
+		else btnFecharPorta3.enabled := true;
+
+	frmResultados.lbNorma.caption := cbNormaUtilizar.text ;
+	frmImpactoPrint.stNormaUtilizada.Caption := cbNormaUtilizar.text ;
+	//frmImpactoPrint.stAlturaSensorNorma.Caption := sAltSens + ' mm';
+
+	frmResultados.lbNMaximo.caption := sAcelMax + ' g' ;
+	frmImpactoPrint.stAceleracaoMaximaNorma.Caption := sAcelMax + ' g' ;
+
+	frmResultados.lbResReal.caption := sAltura + ' m' ;
+	//frmImpactoPrint.stAlturaRealNorma.caption := sAltura + ' m' ;
+
+	frmResultados.lbAltImp.caption := sTAlt1 + ' m';//aqui
+	//frmImpactoPrint.stAlturaImpactoNorma.Caption := sTAlt1 + ' m' ;
+
+	frmResultados.lbVelImp.caption := sVeloc + ' m/s';
+	frmImpactoPrint.stVelocidadeImpactoNorma.Caption := sVeloc + ' m/s' ;
+
+	frmResultados.edDesacPrimLimite.text := sLimite1 ;
+	frmImpactoPrint.stTempoIS1Norma.Caption := sLimite1+' g - '+sTLimite1+' ms.' ;
+
+    if frmNormaImpacto.use2nd.checked then
+    begin
+		frmResultados.edDesacSegLimite.text := sLimite2 ;
+		frmImpactoPrint.stTempoIS2Norma.Caption := sLimite2+' g - '+sTLimite2+' ms.' ;
+    end
+    else
+    begin
+		frmResultados.edDesacSegLimite.text := sLimite2 ;
+		frmImpactoPrint.stTempoIS2Norma.Caption := 'Não aplicável' ;
+    end;
+
+	frmResultados.edTempoPrimLimite.text := sTLimite1 ;
+	//frmImpactoPrint.stTempoS1.Caption := sTLimite1 ;
+
+	frmResultados.edTempoSegLimite.text := sTLimite2 ;
+	//frmImpactoPrint.stTempoS2.Caption := sTLimite2 ;
+
+
+end;
+
+{===============================================================================
+	DESCER O SUPORTE  DESCER O SUPORTE  DESCER O SUPORTE  DESCER O SUPORTE
+===============================================================================}
+procedure TfrmNovoEnsaio.btnDescerClick(Sender: TObject);
+begin
+	// Desce o suporte
+	frmMachineControl.ComandoMotor(#13'ST0 D0 G'#13) ;
+end;
+
+{===============================================================================
+	DESCER E ABRIR A PORTA  DESCER E ABRIR A PORTA  DESCER E ABRIR A PORTA
+===============================================================================}
+procedure TfrmNovoEnsaio.btnDescerAbrirClick(Sender: TObject);
+begin
+	// Desce o suporte
+	frmMachineControl.ComandoMotor(#13'ST0 D0 G'#13) ;
+	// Abre a porta
+	//cbDBitOut( 0, AUXPORT, 0, 1) ;
+end;
+
+{===============================================================================
+	ABRIR A PORTA  ABRIR A PORTA  ABRIR A PORTA  ABRIR A PORTA  ABRIR A PORTA
+===============================================================================}
+procedure TfrmNovoEnsaio.btnAbrirClick(Sender: TObject);
+begin
+	// Abre a porta
+	//cbDBitOut( 0, AUXPORT, 0, 1) ;
+end;
+
+{===============================================================================
+	EMERGÊNCIA CONTINUAR  EMERGÊNCIA CONTINUAR  EMERGÊNCIA CONTINUAR
+===============================================================================}
+procedure TfrmNovoEnsaio.Button3Click(Sender: TObject);
+begin
+	frmNovoEnsaio.nbPages.PageIndex := 2 ;
+    tmrDanger.Enabled := true;
+//	bParar := False ;
+    if btnFecharPorta.caption <> '' then
+	btnFecharPorta.enabled := true ;
+    if btnFecharPorta2.caption <> '' then
+    btnFecharPorta2.enabled := true ;
+    if btnFecharPorta3.caption <> '' then
+    btnFecharPorta3.enabled := true ;
+end;
+
+{===============================================================================
+	EMERGÊNCIA SAIR  EMERGÊNCIA SAIR  EMERGÊNCIA SAIR  EMERGÊNCIA SAIR
+===============================================================================}
+procedure TfrmNovoEnsaio.Button4Click(Sender: TObject);
+begin
+	frmNovoEnsaio.Close ;
+	//btnFecharPorta.enabled := true ;
+end;
+
+{===============================================================================
+	ZOOM ZOOM ZOOM ZOOM ZOOM ZOOM ZOOM ZOOM ZOOM ZOOM ZOOM ZOOM ZOOM ZOOM ZOOM
+===============================================================================}
+procedure TfrmNovoEnsaio.Zoom(PicoMaximo : double ; PosicaoX : LongInt) ;
+var x1,x2,y1,y2 : integer ;
+begin
+			 x1 := Trunc((73 + ( PosicaoX * 0.0621 )) )  ;
+			 // if x1 < 73 then x1 := 73 ;
+			 y1 := Trunc( Trunc( (500 - Trunc( PicoMaximo )) * 0.498 ) - 24 ) + 16 ;
+			 // if y1 < 13 then y1 := 13 ;
+			 x2 := x1 + Trunc( ( 150 * 0.0621 ) );
+			 y2 := 277 ;
+			 frmGrafico.tcGrafico.ZoomRect( Rect( x1, y1, x2, y2) ) ;
+end;
+
+{===============================================================================
+    POSICAO INICIAL  POSICAO INICIAL  POSICAO INICIAL  POSICAO INICIAL
+===============================================================================}
+procedure TfrmNovoEnsaio.Button5Click(Sender: TObject);
+begin
+		tmrPerf.enabled := false;
+		if not CheckOD then
+		begin
+			Application.MessageBox('Erro de leitura do módulo ótico - Possíveis causas:'+#13#10+''+#13#10+'- Régua ótica desligada'+#13#10+'- Chave seletora fora de posição'+#13#10+'- Cabos desconectados ou mau posicionados', '------- ERRO --------', mb_applmodal+mb_iconerror+mb_ok+mb_defbutton1);
+			exit ;
+		end;
+		ResetOD;
+		Pzero := ReadAbsolute ;
+		if Pzero = 0 then
+        begin
+        	ShowMessage('Posição inicial menor do que 1');
+            Exit;
+        end;
+	_1stPerf := false;
+	nbPages.PageIndex := 7 ;
+end;
+
+{===============================================================================
+    FINALIZAR ENSAIO  FINALIZAR ENSAIO  FINALIZAR ENSAIO  FINALIZAR ENSAIO
+===============================================================================}
+procedure TfrmNovoEnsaio.Button6Click(Sender: TObject);
+// Finalizar Perfuração
+begin
+		//timerP.enabled := false;
+        //StopTimerP := true;
+		Pelast := ReadForward  ;
+		if tmpP>Pelast then Pelast := tmpP;
+		tmpP := 0;
+
+		if (Pelast<>0) then
+		begin
+			if (Pelast > 50) then ShowMessage('Erro: Leitura acima de 50 u.m.');
+			if ((Pzero-Pelast) > strtoint(frmPerfRes.lbDElast.Caption)) then
+				begin
+					frmPerfRes.edElast.Font.Color := clBlue ;
+					frmPerfPrint.qres.Font.Color := clBlue ;
+				end
+				else
+				begin
+					frmPerfRes.edElast.Font.Color := clRed ;
+						frmPerfPrint.qres.Font.Color := clRed ;
+				end;
+		frmPerfRes.edElast.text := InttoStr(Pzero-Pelast);
+		frmPerfPrint.qres.caption := frmPerfRes.edElast.text ;
+		end
+		else
+		begin
+			// Maior que - Não chegou a interromper o elemento ótico
+			Application.MessageBox('A medida real excedeu ao'+#13#10+
+						'limite de leitura da régua ótica.'+#13#10+
+                        '( obstrutor não atingiu nem 1)', 'Helmet', mb_systemmodal+mb_ok+mb_defbutton1);
+			frmPerfRes.edElast.text := InttoStr(Pzero);
+			frmPerfPrint.qres.caption := frmPerfRes.edElast.text ;
+		end;
+	if sEnsaio = 'VISEIRA' then
+	begin
+		frmPerfRes.Caption := 'Resultados do Ensaio de Viseira';
+		frmPerfPrint.qtitle.caption := 'Ensaio de Viseira';
+		frmPerfRes.lbEmpresa.Caption := frmNovoEnsaio.cbEmpresa.Text ;
+		frmPerfPrint.stEmpresa.Caption := frmNovoEnsaio.cbEmpresa.Text ;
+		frmPerfRes.lbModelo.Caption := frmNovoEnsaio.cbModeloCapacete.Text ;
+		frmPerfPrint.stCapacete.Caption := frmNovoEnsaio.cbModeloCapacete.Text ;
+		frmPerfRes.lbAmostra.Caption := frmNovoEnsaio.edNumeroAmostra.Text ;
+		frmPerfPrint.stAmostra.Caption := frmNovoEnsaio.edNumeroAmostra.Text ;
+		frmPerfRes.lbLote.Caption := frmNovoEnsaio.edNumeroLote.Text ;
+        frmPerfPrint.stLote.Caption := frmNovoEnsaio.edNumeroLote.Text ;
+		frmPerfRes.lbEnsaio.Caption := frmNovoEnsaio.edPosicaoEnsaio.Text ;
+		frmPerfRes.lbTamanho.Caption := frmNovoEnsaio.edTamanho.Text;
+		frmPerfPrint.stTamanho.Caption := frmNovoEnsaio.edTamanho.Text;
+		frmPerfRes.lbCondicionamento.Caption := frmNovoEnsaio.edCondicionamento.Text ;
+        frmPerfPrint.stCondicionamento.Caption := frmNovoEnsaio.edCondicionamento.Text ;
+		if (strtofloat(frmPerfRes.edElast.text) < strtofloat(sVDin)) then
+		begin
+				frmPerfRes.Label3.font.color := clRed ;
+				frmPerfRes.Label3.caption := 'Resultado parcial do ensaio: NÃO CONFORME' ;
+		end
+		else
+		begin
+			 frmPerfRes.Label3.font.color := clBlue ;
+			 frmPerfRes.Label3.caption := 'Resultado parcial do ensaio: CONFORME' ;
+		end;
+		Dec(iVno) ;
+		Inc(iPVezes) ;
+		frmPerfRes.lbEnsUnit.Caption := 'Ensaio '+inttostr(iPVezes)+'/'+sVno ;
+		frmPerfPrint.stREnsaios.Caption := 'Ensaio '+inttostr(iPVezes)+'/'+sVno ;
+		if frmPerfRes.Label3.caption = 'Resultado parcial do ensaio: NÃO CONFORME' then
+        PCNC := false ;
+
+// Se todas as vezes programadas acabaram,
+		if iPVezes = strtoint(sVno) then
+		begin
+// Reseta contagem de vezes
+			iPVezes := 0 ;
+// Mostra resultado global na impressão
+			if PCNC = true then
+			begin
+				frmPerfRes.lbResGlobal.visible := true ;
+				frmPerfRes.stResGlobal.Font.Color := RGB(0,0,255) ;
+				frmPerfRes.stResGlobal.visible := true ;
+				frmPerfRes.stResGlobal.Caption := 'CONFORME' ;
+			end
+			else
+			begin
+				frmPerfRes.lbResGlobal.visible := true ;
+				frmPerfRes.stResGlobal.Font.Color := RGB(255,0,0) ;
+				frmPerfRes.stResGlobal.visible := true ;
+				frmPerfRes.stResGlobal.Caption := 'NÃO CONFORME' ;
+			end;
+
+// Reseta CNC global
+			PCNC := true ;
+		end
+		else
+// Se não, não mostra resultados globais
+		begin
+				frmPerfRes.lbResGlobal.visible := false ;
+				frmPerfRes.stResGlobal.visible := false ;
+		end ;
+		if iVno > 0 then
+		begin
+			nbPages.PageIndex := 6 ;
+			frmPerfRes.Show ;
+		end
+		else
+		begin
+			ResetOD;
+			nbPages.PageIndex := 0 ;
+			frmNovoEnsaio.Close ;
+			frmPerfRes.Show ;
+		end;
+
+	end
+	else // Se for ensaio de PERFURAÇÃO
+	begin
+		frmPerfRes.Caption := 'Resultados do Ensaio de Resistência à Perfuração';
+		frmPerfPrint.qtitle.caption := 'Ensaio de Resistência à Perfuração';
+        frmPerfRes.lbEmpresa.Caption := frmNovoEnsaio.cbEmpresa.text ;
+		frmPerfPrint.stEmpresa.Caption := frmNovoEnsaio.cbEmpresa.Text ;
+        frmPerfRes.lbModelo.Caption := frmNovoEnsaio.cbModeloCapacete.Text ;
+		frmPerfPrint.stCapacete.Caption := frmNovoEnsaio.cbModeloCapacete.Text ;
+        frmPerfRes.lbAmostra.Caption := frmNovoEnsaio.edNumeroAmostra.Text;
+		frmPerfPrint.stAmostra.Caption := frmNovoEnsaio.edNumeroAmostra.Text ;
+        frmPerfRes.lbLote.Caption := frmNovoEnsaio.edNumeroLote.Text;
+		frmPerfPrint.stLote.Caption := frmNovoEnsaio.edNumeroLote.Text ;
+		frmPerfRes.lbEnsaio.Caption := frmNovoEnsaio.edPosicaoEnsaio.Text ;
+		frmPerfPrint.stTamanho.Caption := frmNovoEnsaio.edTamanho.Text;
+		frmPerfRes.lbTamanho.Caption := frmNovoEnsaio.edTamanho.Text;
+        frmPerfRes.lbCondicionamento.Caption := frmNovoEnsaio.edCondicionamento.Text;
+		frmPerfPrint.stCondicionamento.Caption := frmNovoEnsaio.edCondicionamento.Text ;
+		if (strtofloat(frmPerfRes.edElast.text) < strtofloat(sPDin)) then
+		begin
+			 frmPerfRes.Label3.font.color := clRed ;
+			 frmPerfRes.Label3.caption := 'Resultado parcial do ensaio: NÃO CONFORME' ;
+		end
+		else
+		begin
+			 frmPerfRes.Label3.font.color := clBlue ;
+			 frmPerfRes.Label3.caption := 'Resultado parcial do ensaio: CONFORME' ;
+		end;
+		Dec(iPno) ;
+		Inc(iPVezes) ;
+		frmPerfRes.lbEnsUnit.Caption := 'Ensaio '+inttostr(iPVezes)+'/'+sPno ;
+		frmPerfPrint.stREnsaios.Caption := 'Ensaio '+inttostr(iPVezes)+'/'+sPno ;
+        if frmPerfRes.Label3.caption = 'Resultado parcial do ensaio: NÃO CONFORME' then
+        PCNC := false ;
+
+
+// Se todas as vezes programadas acabaram,
+		if iPVezes = strtoint(sPno) then
+		begin
+// Reseta contagem de vezes
+			iPVezes := 0 ;
+// Mostra resultado global na impressão
+			if PCNC = true then
+			begin
+				frmPerfRes.lbResGlobal.visible := true ;
+				frmPerfRes.stResGlobal.Font.Color := RGB(0,0,255) ;
+				frmPerfRes.stResGlobal.visible := true ;
+				frmPerfRes.stResGlobal.Caption := 'CONFORME' ;
+			end
+			else
+			begin
+				frmPerfRes.lbResGlobal.visible := true ;
+				frmPerfRes.stResGlobal.Font.Color := RGB(255,0,0) ;
+				frmPerfRes.stResGlobal.visible := true ;
+				frmPerfRes.stResGlobal.Caption := 'NÃO CONFORME' ;
+			end;
+
+// Reseta CNC global
+			PCNC := true ;
+		end
+		else
+// Se não, não mostra resultados globais
+		begin
+				frmPerfRes.lbResGlobal.visible := false ;
+				frmPerfRes.stResGlobal.visible := false ;
+		end ;
+
+		if iPno > 0 then
+		begin
+			nbPages.PageIndex := 6 ;
+			frmPerfRes.Show ;
+		end
+		else
+		begin
+			ResetOD;
+			nbPages.PageIndex := 0 ;
+			frmNovoEnsaio.Close ;
+			frmPerfRes.Show ;
+		end;
+
+	end;
+end;
+
+{===============================================================================
+	INICIAR PERF  INICIAR PERF  INICIAR PERF  INICIAR PERF
+===============================================================================}
+procedure TfrmNovoEnsaio.Button7Click(Sender: TObject);
+var tdw1 : byte;
+	gtrX : longint;
+begin
+	ResetOD ;  // Reset Optical Device
+    ResetOD ;
+    ResetOD ;
+	nbPages.PageIndex := 8 ;
+	button6.enabled := false; // Desabilita botão finalizar perfuração
+
+    Application.ProcessMessages; // Mostra tela do finalizar ensaio
+
+    tmpP:=0; // Reseta variável que retém pico máximo.
+    gtrX := GetTickCount; // Lê tick atual
+
+    repeat // Loop de leitura do pico máximo da régua ótica
+    	repeat
+			tdw1 := ReadAbsolute;
+	    until tdw1<=50;
+		if tdw1>tmpP then tmpP:=tdw1;
+    until ((GetTickCount-gtrX) >= 4000);
+
+    button6.enabled := true; // Habilita novamente o botão finalizar perfuração
+    //timerP.enabled := true;
+end;
+
+procedure TfrmNovoEnsaio.btnCintaJugularClick(Sender: TObject);
+var
+	iItem	:	integer;
+begin
+	sEnsaio := 'CINTA' ;
+	cbNormaUtilizar.Items.Clear;
+	if frmNormas.lvNormasCinta.Items.Count=0 then Exit;
+	for iItem:=0 to frmNormas.lvNormasCinta.Items.Count-1 do
+		cbNormaUtilizar.Items.Add(
+			frmNormas.lvNormasCinta.Items.Item[iItem].Caption
+			);
+	nbPages.PageIndex := 1;
+end;
+
+procedure TFrmNovoEnsaio.GetNCintaValues ;
+begin
+	sCDin := frmNormas.lvNormasCinta.Items.Item[frmHelmet.NormaAtual].SubItems.Strings[0];
+	sCEst := frmNormas.lvNormasCinta.Items.Item[frmHelmet.NormaAtual].Subitems.Strings[1];
+	frmCintaRes.lbDElast.Caption := sCDin ;
+	frmCintaRes.lbDPlast.Caption := sCEst ;
+	frmCintaPrint.stDPlast.Caption := sCEst ;
+	frmCintaPrint.stDElast.Caption := sCDin ;
+// Pega valores do form geral
+	frmCintaRes.lbEmpresa.Caption := frmNovoEnsaio.cbEmpresa.Text ;
+	frmCintaRes.lbModelo.Caption := frmNovoEnsaio.cbModeloCapacete.Text ;
+	frmCintaRes.lbAmostra.Caption := frmNovoEnsaio.edNumeroAmostra.Text ;
+	frmCintaRes.lbLote.Caption := frmNovoEnsaio.edNumeroLote.Text ;
+	frmCintaRes.lbTam.Caption := frmNovoEnsaio.edTamanho.Text;
+	frmCintaRes.lbCondicionamento.Caption := frmNovoEnsaio.edCondicionamento.Text ;
+
+end;
+
+procedure TFrmNovoEnsaio.GetNViseiraValues ;
+begin
+	sVDin := frmNormas.lvNormasViseira.Items.Item[frmHelmet.NormaAtual].SubItems.Strings[0];
+	sVno :=	frmNormas.lvNormasViseira.Items.Item[frmHelmet.NormaAtual].SubItems.Strings[1];
+	iVno := strtoint(sVno) ;
+	frmPerfPrint.stDElast.Caption := sVDin ;
+	frmPerfRes.lbDElast.Caption := sVDin ;
+	frmPerfPrint.stEnsaios.Caption := sVno ;
+	frmPerfRes.lbEnsaios.Caption := sVno ;
+end;
+
+procedure TFrmNovoEnsaio.GetNPerfValues ;
+begin
+	sPDin := frmNormas.lvNormasPerfuracao.Items.Item[frmHelmet.NormaAtual].SubItems.Strings[0];
+	sPno := frmNormas.lvNormasPerfuracao.Items.Item[frmHelmet.NormaAtual].SubItems.Strings[1] ;
+	iPno := strtoint(sPno) ;
+	frmPerfPrint.stDElast.Caption := sPDin ;
+	frmPerfRes.lbDElast.Caption := sPDin ;
+	frmPerfPrint.stEnsaios.Caption := sPno ;
+	frmPerfRes.lbEnsaios.Caption := sPno ;
+end;
+
+{===============================================================================
+	INICIAR CINTA INICIAR CINTA INICIAR CINTA INICIAR CINTA INICIAR CINTA
+ ===============================================================================}
+procedure TfrmNovoEnsaio.Button8Click(Sender: TObject);
+var _tdw : byte;
+	gtrx2,_bfindex : longint;
+begin
+	if (strtoint(edRPos.Caption) < 1) then
+    begin
+    	ShowMessage('Valor inicial menor do que 1.');
+        Exit;
+    end;
+		tmrLeitura.enabled := false ;
+
+		//ResetOD; // Reset Optical Device
+        //ResetOD;
+        //ResetOD;
+		CPzero := ReadAbsolute ;
+        for _bfindex:=1 to 1999999 do
+        	GlobalReads[_bfindex] := $20; // Limpa buffer
+
+        ShowMessage('Pressione OK quando o equipamento estiver pronto.');
+		nbPages.PageIndex := 10 ;
+        button9.enabled := false;
+        Application.ProcessMessages;
+        gtrx2 := GetTickCount;
+        _bfindex:=1;
+
+        repeat
+            asm
+	            mov dx,LPTControl
+	            mov al,$0A
+	            out dx,al
+	            mov dx,LPTAddress
+	            in al,dx
+	            and al,63
+				mov _tdw,al
+            end;
+			GlobalReads[_bfindex]:=_tdw;
+            _bfindex:=_bfindex+1;
+        until ((GetTickCount-gtrx2)>=4000);
+        GRIndex := _bfindex;
+
+       button9.enabled := true;
+end;
+
+
+procedure TfrmNovoEnsaio.Button9Click(Sender: TObject);
+var t1 : longint ;
+	_erc1 : longint;
+begin
+		bCD := false;
+		button9.enabled := false;
+		btnCC.visible := true;
+
+		//timerP.enabled := false;
+        //StopTimerP := true;
+
+        CPelast:=0;
+        for _erc1:=1 to GRIndex-1 do
+        begin
+            if GlobalReads[_erc1] > CPelast then
+            	CPelast := GlobalReads[_erc1];
+        end;
+
+   		t1 := GetTickCount;
+
+		lbDin.Caption := 'Deslocamento dinâmico: ' + inttostr(CPelast-CPzero) + ' mm.';
+		repeat
+			Application.ProcessMessages ;
+			lbCount.Caption := 'Contando: '+FormatFloaT('###',((GetTickCount-t1)/1000))+' seg.';
+			lbRes.Caption := 'Deslocamento residual: '+ inttostr(ReadAbsolute-CPzero)+' mm.';
+			if bCD then break;
+		until (( GetTickCount - t1) >= 120000 ); //120000 milissegundos = 2 minutos
+		lbCount.Caption := ' ';
+		Button9.enabled := true;
+		btnCC.visible := false;
+		lbDin.Caption := '';
+		lbRes.Caption := '';
+		CPplast := ReadAbsolute ;
+		if ((CPelast > 50)) then
+    begin
+    	ShowMessage('Erro durante aquisição da medida elástica.');
+    end;
+
+    if (CPplast=50) then
+		frmCintaRes.edPlast.text := inttostr(CPplast-CPzero)
+		else
+	frmCintaRes.edPlast.text := inttostr(CPplast-CPzero) ;
+
+    if (CPelast=50) then
+    frmCintaRes.edElast.text := inttostr(CPelast-CPzero)
+    else
+	frmCintaRes.edElast.text := inttostr(CPelast-CPzero) ;
+
+	frmCintaPrint.eres.caption := frmCintaRes.edElast.text ;
+	frmCintaPrint.pres.caption := frmCintaRes.edPlast.text ;
+
+		begin
+		if (strtofloat(frmCintaRes.edElast.text) > strtofloat(sCDin)) or
+		(strtofloat(frmCintaRes.edPlast.text) > strtofloat(sCEst))
+		 then
+		begin
+			 frmCintaRes.stRes.font.color := clRed ;
+			 frmCintaRes.stRes.caption := 'NÃO CONFORME' ;
+             if (strtofloat(frmCintaRes.edElast.text) > strtofloat(sCDin)) then
+             begin
+             	frmCintaPrint.eres.Font.Color := clRed ;
+                frmCintaRes.edElast.Font.Color := clRed ;
+             end
+             else
+             begin
+             	frmCintaPrint.eres.Font.Color := clBlue ;
+                frmCintaRes.edElast.Font.Color := clBlue ;
+             end;
+             if (strtofloat(frmCintaRes.edPlast.text) > strtofloat(sCEst)) then
+             begin
+             	frmCintaPrint.pres.Font.Color := clRed ;
+                frmCintaRes.edPlast.Font.Color := clRed ;
+             end
+             else
+             begin
+               	frmCintaPrint.pres.Font.Color := clBlue ;
+                frmCintaRes.edPlast.Font.Color := clBlue ;
+             end;
+		end
+		else
+		begin
+			 frmCintaRes.stRes.font.color := clBlue ;
+			 frmCintaRes.stRes.caption := 'CONFORME' ;
+             frmCintaRes.edPlast.Font.Color := clBlue ;
+             frmCintaRes.edElast.Font.Color := clBlue ;
+             frmCintaPrint.pres.Font.Color := clBlue ;
+             frmCintaPrint.eres.Font.Color := clBlue ;
+		end;
+		end;
+			ResetOD;
+        frmNovoEnsaio.Close ;
+        frmCintaRes.Show ;
+end;
+
+
+procedure TfrmNovoEnsaio.btnCancelClick(Sender: TObject);
+begin
+    nbPages.PageIndex := 0 ;
+    MTimeout := 30;
+    lbRest.Caption := '30';
+    tmrDanger.Enabled := false ;
+	frmMAchineControl.ComandoMotor(#13'ST1'#13);
+    frmNovoEnsaio.Close ;
+end;
+
+procedure TfrmNovoEnsaio.Button10Click(Sender: TObject);
+begin
+	frmNovoEnsaio.Close ;
+end;
+
+
+procedure TfrmNovoEnsaio.Button12Click(Sender: TObject);
+begin
+	espera := false ;
+	frmNovoEnsaio.Close ;
+end;
+
+procedure TfrmNovoEnsaio.Button11Click(Sender: TObject);
+begin
+	frmNovoEnsaio.Close ;
+end;
+
+
+procedure TfrmNovoEnsaio.tmrDangerTimer(Sender: TObject);
+begin
+	Dec( MTimeout ) ;
+	if MTimeout > 10 then	lbRest.Font.Color := clBlue
+	else
+	lbRest.Font.Color := clRed ;
+
+	lbRest.Caption := inttostr(MTimeout) ;
+	if MTimeout = 0 then
+	begin
+		tmrDanger.enabled := false ;
+		lbRest.Font.color := clBlue ;
+		lbRest.Caption := '30' ;
+		frmMachineControl.ComandoMotor(#13'ST1'#13) ;
+		frmNovoEnsaio.nbPages.PageIndex := 1;
+	end;
+
+end;
+
+
+procedure TfrmNovoEnsaio.btnFecharPorta2Click(Sender: TObject);
+var temp : extended ;
+begin
+		sVeloc := sVeloc2;
+		if ((frmAtrito.edAtrito.Text <> '0') and (frmAtrito.edAtrito.Text <> ''))then
+		begin
+			temp := (1 + (strtofloat(frmAtrito.edAtrito.Text) / 100)) * strtofloat(sAltura2);
+			sAltura := formatfloat('0.00',temp) ;
+		end
+		else
+		sAltura := sAltura2;
+		frmResultados.lbResReal.caption := sAltura + ' m';//aqui
+		frmResultados.lbVelImp.caption := sVeloc + ' m/s';
+		frmImpactoPrint.stVelocidadeImpactoNorma.Caption := sVeloc + ' m/s' ;
+		frmResultados.lbAltImp.caption := sTAlt2 + ' m';//aqui
+
+		btnFecharPortaClick(Sender);
+end;
+
+
+procedure TfrmNovoEnsaio.btnFecharPorta3Click(Sender: TObject);
+var temp : extended;
+begin
+
+
+		sVeloc := sVeloc3 ;
+		if frmAtrito.edAtrito.Text <> '' then
+		begin
+			temp := (1 + (strtofloat(frmAtrito.edAtrito.Text) / 100)) * strtofloat(sAltura3);
+			sAltura := formatfloat('0.00',temp) ;
+		end
+		else
+		sAltura := sAltura3;
+		frmResultados.lbResReal.caption := sAltura + ' m';//aqui
+		frmResultados.lbVelImp.caption := sVeloc + ' m/s';
+		frmImpactoPrint.stVelocidadeImpactoNorma.Caption := sVeloc + ' m/s' ;
+		frmResultados.lbAltImp.caption := sTAlt3 + ' m';//aqui
+
+		btnFecharPortaClick(Sender);
+end;
+
+procedure TfrmNovoEnsaio.btnFecharPorta1Click(Sender: TObject);
+var temp : extended;
+begin
+        // Velocidade permitida pela norma atual seçao 1
+		sVeloc := frmNormas.lvNormasImpacto.Items.Item[frmHelmet.NormaAtual].SubItems.Strings[3];
+        // Calcula Altura + altura-atrito
+		if frmAtrito.edAtrito.Text <> '' then
+		begin
+			temp := (1 + (strtofloat(frmAtrito.edAtrito.Text) / 100)) * strtofloat(
+			frmNormas.lvNormasImpacto.Items.Item[frmHelmet.NormaAtual].Subitems.Strings[4]);
+			sAltura := formatfloat('0.00',temp) ;
+		end
+		else
+		sAltura := frmNormas.lvNormasImpacto.Items.Item[frmHelmet.NormaAtual].Subitems.Strings[4];
+
+		frmResultados.lbResReal.caption := sAltura + ' m';//aqui
+		frmResultados.lbVelImp.caption := sVeloc + ' m/s';
+		frmImpactoPrint.stVelocidadeImpactoNorma.Caption := sVeloc + ' m/s' ;
+		frmResultados.lbAltImp.caption := sTAlt1 + ' m';//aqui
+
+		btnFecharPortaClick(Sender);
+end;
+
+function TfrmNovoEnsaio.ReadForward : byte;
+var Dt : byte ;
+begin
+			Porta_1.OutB(LPTControl, $00); // Zero
+				//Delay(500);
+			Porta_1.OutB(LPTControl, $09); // Avanço
+				Delay(500);
+				Dt  := Porta_1.InpB(LPTAddress) and 63;
+            Porta_1.OutB(LPTControl, $00); // Zero
+		ReadForward := Dt ;
+end;
+
+function TfrmNovoEnsaio.ReadAbsolute : byte ;
+var Dt : byte ;
+begin
+     	Porta_1.OutB(LPTControl, $00); // Zero
+        //Delay(500);
+     	Porta_1.OutB(LPTControl, $0A); // Absoluta
+        DelayRegua(500);
+        Dt  := Porta_1.InpB(LPTAddress) and 63;
+		ReadAbsolute := Dt ;
+end;
+
+function TFrmNovoEnsaio.CheckOD : boolean ;
+begin
+		if (ReadAbsolute > 50) then CheckOD := false else CheckOD := true ;
+end;
+
+procedure TfrmNovoEnsaio.ResetOD;
+begin
+	  Porta_1.OutB(LPTControl, $04); // Reset
+	  Delay(500);
+      Porta_1.OutB(LPTControl, $00); // Zero
+    //Porta_1.OutB(LPTAddress, $FF); // Ler
+end;
+
+
+procedure TfrmNovoEnsaio.Button16Click(Sender: TObject);
+begin
+    bCD := true;
+		frmNovoEnsaio.Close ;
+end;
+
+procedure TfrmNovoEnsaio.FormClose(Sender: TObject;
+  var Action: TCloseAction);
+begin
+	tmrLeitura.enabled := false ;
+end;
+
+procedure TfrmNovoEnsaio.tmrLeituraTimer(Sender: TObject);
+begin
+	tmrLeitura.enabled := false;
+	frmNovoEnsaio.edRPos.caption := inttostr(ReadAbsolute);
+	tmrLeitura.enabled := true ;
+end;
+
+procedure TfrmNovoEnsaio.tmrPararTimer(Sender: TObject);
+begin
+	bParar := true;
+		tmrParar.enabled := false ;
+	cbDBitOut(0, AUXPORT, 1, 1); // Fechar Garra
+end;
+
+procedure TfrmNovoEnsaio.SetStatus(str:string);
+begin
+	Status.SimpleText := str;
+end;
+
+procedure TfrmNovoEnsaio.GetCombos;
+begin
+	cbEmpresa.Items         := frmEmpresas.lbEmpresas.Items;
+	cbModeloCapacete.Items  := frmCapacetes.lbCapacetes.Items;
+	edPosicaoEnsaio.Items   := frmPos.lbPosicoes.Items;
+	edCondicionamento.Items := frmCondicionamento.lbCondicionamentos.Items;
+end;
+
+procedure TfrmNovoEnsaio.timerPTimer(Sender: TObject);
+var t : byte;
+begin
+	timerP.enabled := false;
+    repeat
+		t := ReadForward;
+    until t<=50;
+	if t>tmpP then	tmpP:=t;
+    if StopTimerP = false then
+		timerP.enabled := true else
+        StopTimerP := false;
+	Application.ProcessMessages;
+end;
+
+procedure TfrmNovoEnsaio.btnCCClick(Sender: TObject);
+begin
+	bCD := true;
+end;
+
+procedure TfrmNovoEnsaio.tmrPerfTimer(Sender: TObject);
+begin
+	tmrPerf.enabled := false;
+	lbIni.Caption := inttostr(ReadAbsolute);
+	Application.ProcessMessages;
+	tmrPerf.enabled := true;
+end;
+
+
+
+procedure TfrmNovoEnsaio.btnSobeMouseDown(Sender: TObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+	frmMachineControl.ComandoMotor(#13'A50 V8 D2083333 ST0'#13) ;
+	frmMachineControl.ComandoMotor(#13'H- G'#13);
+end;
+
+procedure TfrmNovoEnsaio.btnSobeMouseUp(Sender: TObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+	frmMachineControl.ComandoMotor(#13'S'#13) ;
+end;
+
+procedure TfrmNovoEnsaio.btnDesceMouseDown(Sender: TObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+	frmMachineControl.ComandoMotor(#13'A50 V8 D2083333 ST0'#13) ;
+	frmMachineControl.ComandoMotor(#13'H+ G'#13);
+end;
+
+procedure TfrmNovoEnsaio.btnDesceMouseUp(Sender: TObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+	frmMachineControl.ComandoMotor(#13'S'#13);
+end;
+
+
+end.

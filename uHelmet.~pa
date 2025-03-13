@@ -1,0 +1,794 @@
+unit uHelmet;
+
+
+interface
+
+
+uses
+	Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+	OleCtrls, ToolWin, ComCtrls, Menus, StdCtrls, ExtCtrls, Buttons, Registry, CBW32, IniFiles
+	;
+
+
+type
+	TfrmHelmet = class(TForm)
+		mnuMain: TMainMenu;
+		mnuEnsaio: TMenuItem;
+		mnuConfiguracoes: TMenuItem;
+		mnuAjuda: TMenuItem;
+		dlgAbrir: TOpenDialog;
+		dlgSalvar: TSaveDialog;
+		mnuNovo: TMenuItem;
+		mnuAbrir: TMenuItem;
+		mnuSalvar: TMenuItem;
+		N1: TMenuItem;
+		N2: TMenuItem;
+		mnuConfigurarImpressora: TMenuItem;
+		N3: TMenuItem;
+		mnuSair: TMenuItem;
+		mnuEmpresas: TMenuItem;
+		mnuConteudo: TMenuItem;
+		N5: TMenuItem;
+		mnuSobre: TMenuItem;
+		mnuNormas: TMenuItem;
+		mnuSalvarComo: TMenuItem;
+		bbNovoEnsaio: TBitBtn;
+		bbAbrirEnsaio: TBitBtn;
+		bbSalvarEnsaio: TBitBtn;
+		bbExibirGrafico: TBitBtn;
+    bbContinuarEnsaio: TBitBtn;
+		bbResultadosEnsaio: TBitBtn;
+		mnuCapacetes: TMenuItem;
+		dlgPrinterSetup: TPrinterSetupDialog;
+    Timer1: TTimer;
+    mnuPos: TMenuItem;
+    Condicionamentos1: TMenuItem;
+    Atrito1: TMenuItem;
+    Acelermetros1: TMenuItem;
+    Perfurao1: TMenuItem;
+    N4: TMenuItem;
+    Hardware1: TMenuItem;
+    Panel1: TPanel;
+		procedure FormCreate(Sender: TObject);
+		procedure FormClose(Sender: TObject; var Action: TCloseAction);
+		procedure mnuSairClick(Sender: TObject);
+		procedure mnuNormasClick(Sender: TObject);
+		procedure bbNovoEnsaioClick(Sender: TObject);
+		procedure mnuEmpresasClick(Sender: TObject);
+		procedure mnuCapacetesClick(Sender: TObject);
+		procedure FormDestroy(Sender: TObject);
+		procedure FormResize(Sender: TObject);
+		procedure bbSalvarEnsaioClick(Sender: TObject);
+		procedure bbExibirGraficoClick(Sender: TObject);
+		procedure bbAbrirEnsaioClick(Sender: TObject);
+		procedure bbResultadosEnsaioClick(Sender: TObject);
+    procedure mnuSobreClick(Sender: TObject);
+    procedure mnuConfigurarImpressoraClick(Sender: TObject);
+    procedure bbContinuarEnsaioClick(Sender: TObject);
+		procedure Timer1Timer(Sender: TObject);
+    procedure mnuPosClick(Sender: TObject);
+    procedure Condicionamentos1Click(Sender: TObject);
+    procedure mnuConteudoClick(Sender: TObject);
+    procedure Atrito1Click(Sender: TObject);
+    procedure Acelermetros1Click(Sender: TObject);
+    procedure Perfurao1Click(Sender: TObject);
+	private
+		procedure WMGetMinMaxInfo(var MSG: Tmessage); message WM_GetMinMaxInfo;
+	public
+		NormaAtual : integer ;
+        ESCount : extended;
+		procedure ResizeControls;
+		procedure SaveImpacto(FileName: TFileName);
+		procedure LoadImpacto(FileName: TFileName);
+		function ScanForLimits( limite : double ) : double ;
+	end;
+
+
+var
+	frmHelmet	: TfrmHelmet;
+	FileName	:	TFileName;
+	lPontosImpacto	:	longint = 10000 ; //RateChange
+	EnsaioAtual			:	(eaNone, eaImpacto, eaPerfuracao, eaViseira, eaCinta);
+		SavCount : TIniFile ;
+
+
+const
+	IMPACTO_ID			=	'HMTIM';
+	PERFURACAO_ID		=	'HMTPE';
+	VISEIRA_ID			=	'HMTVI';
+	ScreenWidth			=	1024;
+	ScreenHeight		=	768;
+
+
+
+
+
+implementation
+
+
+uses uNormas, uNovoEnsaio, uEmpresas, uCapacetes, uMachineControl,
+		 uGrafico, uImpactoPrint, uResultados, uAbout, uProgress, uPos,
+		 uCondicionamento, uAtrito, uAcelerometros, uP;
+
+
+{$R *.DFM}
+
+
+{===============================================================================
+===============================================================================}
+procedure TfrmHelmet.FormCreate(Sender: TObject);
+var
+	rgApp		:	TRegistry;
+begin
+	FileName := '';
+	rgApp := TRegistry.Create;
+	if rgApp.OpenKey('\Software\Access\Helmet', False) then
+	begin
+		try
+			Self.Height := StrToInt(rgApp.ReadString('Height'));
+			Self.Left := StrToInt(rgApp.ReadString('Left'));
+			Self.Top := StrToInt(rgApp.ReadString('Top'));
+			Self.Width := StrToInt(rgApp.ReadString('Width'));
+			Self.WindowState := TWindowState(StrToInt(rgApp.ReadString('State')));
+		except
+		end;
+	end;
+	rgApp.Free;
+	ResizeControls;
+        Self.Caption := 'Helmet System - '+DateToStr(Now);
+    SavCount := TIniFile.Create('SAVCNT.INI');
+    EScount := strtofloat(SavCount.ReadString('VALOR', 'Count', '00000'));
+
+    {Delay(4000);
+				CbDBitOut(0, AUXPORT, 2, 1) ;  // Liga Fonte do motor
+               	//CbDBitOut(0, AUXPORT, 3, 1) ;  //coloca em modo normal
+				frmMachineControl.Delay(2000);
+				frmMachineControl.Comm.StartComm ;
+				frmMachineControl.Delay(2000);
+				frmMachineControl.ComandoMotor(#13'ST1'#13) ;
+				frmMachineControl.Comm.StopComm ; }
+end;
+
+
+{===============================================================================
+
+===============================================================================}
+procedure TfrmHelmet.mnuSairClick(Sender: TObject);
+begin
+	Close;
+end;
+
+
+{===============================================================================
+
+===============================================================================}
+procedure TfrmHelmet.mnuNormasClick(Sender: TObject);
+begin
+	frmNormas.ShowModal;
+end;
+
+
+{===============================================================================
+
+===============================================================================}
+procedure TfrmHelmet.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+	Action := caFree;
+	// Implementar código para gravar configurações
+end;
+
+
+{===============================================================================
+
+===============================================================================}
+procedure TfrmHelmet.bbNovoEnsaioClick(Sender: TObject);
+begin
+	frmNovoEnsaio.ShowModal;
+	frmNovoEnsaio.iImpactos := 0 ;
+	frmNovoEnsaio.nbPages.PageIndex := 0 ;
+	frmNovoEnsaio.nbPages.ActivePage := 'Tipo' ;
+end;
+
+
+{===============================================================================
+
+===============================================================================}
+procedure TfrmHelmet.mnuEmpresasClick(Sender: TObject);
+begin
+	frmEmpresas.ShowModal;
+end;
+
+
+{===============================================================================
+
+===============================================================================}
+procedure TfrmHelmet.mnuCapacetesClick(Sender: TObject);
+begin
+	frmCapacetes.ShowModal;
+end;
+
+
+{===============================================================================
+
+===============================================================================}
+procedure TfrmHelmet.FormDestroy(Sender: TObject);
+var
+	rgApp		:	TRegistry;
+begin
+	cbDBitOut(0, AUXPORT, 2, 1); // Desliga fonte do motor
+	rgApp := TRegistry.Create;
+	if rgApp.OpenKey('\Software\Access\Helmet', True) then
+	begin
+		rgApp.WriteString('Height', IntToStr(Self.Height));
+		rgApp.WriteString('Left'  , IntToStr(Self.Left));
+		rgApp.WriteString('Top'   , IntToStr(Self.Top));
+		rgApp.WriteString('Width' , IntToStr(Self.Width));
+		rgApp.WriteString('State' , IntToStr(Integer(Self.WindowState)));
+	end;
+	rgApp.Free;
+    SavCount.WriteString('VALOR', 'Count', formatfloat('00000',EScount));
+end;
+
+
+{===============================================================================
+
+===============================================================================}
+procedure TfrmHelmet.FormResize(Sender: TObject);
+begin
+	ResizeControls;
+end;
+
+
+{===============================================================================
+
+===============================================================================}
+procedure TfrmHelmet.ResizeControls;
+var
+	iSecondColumnLefts,
+	iSecondRowTop,
+	iThirdRowTop,
+	iButtonWidth,
+	iButtonHeight,
+	iClientWidth,
+	iClientHeight	:	integer;
+begin
+	iClientWidth := Self.ClientWidth;
+	iClientHeight := Self.ClientHeight;
+
+	iButtonHeight := (iClientHeight - 40) div 3;
+	iButtonWidth := (iClientWidth - 30) div 2;
+	iSecondColumnLefts := 20 + iButtonWidth;
+	iSecondRowTop := 20 + iButtonHeight;
+	iThirdRowTop := iSecondRowTop + 10 + iButtonHeight;
+
+	with bbNovoEnsaio do
+	begin
+		Top := 10;
+		Left := 10;
+		Height := iButtonHeight;
+		Width := iButtonWidth;
+	end;
+
+	with bbAbrirEnsaio do
+	begin
+		Top := iSecondRowTop;
+		Left := 10;
+		Height := iButtonHeight;
+		Width := iButtonWidth;
+	end;
+
+	with bbSalvarEnsaio do
+	begin
+		Top := iThirdRowTop;
+		Left := 10;
+		Height := iButtonHeight;
+		Width := iButtonWidth;
+	end;
+
+	with bbExibirGrafico do
+	begin
+		Top := 10;
+		Left := iSecondColumnLefts;
+		Height := iButtonHeight;
+		Width := iButtonWidth;
+	end;
+
+	with bbResultadosEnsaio do
+	begin
+		Top := iSecondRowTop;
+		Left := iSecondColumnLefts;
+		Height := iButtonHeight;
+		Width := iButtonWidth;
+	end;
+
+	with bbContinuarEnsaio do
+	begin
+		Top := iThirdRowTop;
+		Left := iSecondColumnLefts;
+		Height := iButtonHeight;
+		Width := iButtonWidth;
+	end;
+
+	Self.Font.Size := (bbNovoEnsaio.Width + bbNovoEnsaio.Height) div 20;
+end;
+
+
+{===============================================================================
+
+===============================================================================}
+procedure TfrmHelmet.WMGetMinMaxInfo(var MSG: Tmessage);
+begin
+	inherited;
+	with PMinMaxInfo(MSG.lparam)^ do
+	begin
+		with ptMinTrackSize do
+		begin
+			X := 215;
+      Y := 320;
+    end;
+		with ptMaxTrackSize do
+		begin
+      X := 1600;
+      Y := 1240;
+		end;
+	end;
+end;
+
+
+{===============================================================================
+
+===============================================================================}
+// Retorna string iLen espaços
+function Spaces(iLen: integer): string;
+var
+	i	:	integer;
+begin
+	for i:=1 to iLen do
+		Result := Result + #32;
+end;
+
+
+{===============================================================================
+
+===============================================================================}
+procedure TfrmHelmet.SaveImpacto(FileName: TFileName);
+var
+	fsImp		:	TFileStream;
+	i				:	integer;
+	dfX			:	single;
+	dfY			:	single;
+	xPos		: integer ;
+	sTxt		: string ;
+	// Escreve string sValue na stream fsImp +
+	// (iSize - Length(sValue)) spaces
+	procedure WriteString(sValue: string; iSize: integer);
+	var
+		sTemp		:	string ;
+		szTemp	:	array [0..255] of char;
+	begin
+		sTemp := sValue + Spaces(iSize - Length(sValue));
+		StrPCopy(szTemp, sTemp);
+		fsImp.Write(szTemp, iSize);
+	end;
+
+begin
+	if (FileName='') then Exit;
+	fsImp := TFileStream.Create(FileName, fmCreate);
+	WriteString(IMPACTO_ID, 5);
+
+	WriteString(FloatToStr(frmNovoEnsaio.dMax),5) ;
+	WriteString(IntToStr(frmNovoEnsaio.PosicaoX),5) ;
+
+	WriteString(frmNovoEnsaio.cbEmpresa.Text, 64);
+	WriteString(frmNovoEnsaio.cbModeloCapacete.Text, 16);
+	WriteString(frmNovoEnsaio.edNumeroAmostra.Text, 16);
+	WriteString(frmNovoEnsaio.edNumeroLote.Text, 16);
+	WriteString(frmNovoEnsaio.edPosicaoEnsaio.Text, 16);
+	WriteString(frmNovoEnsaio.edCondicionamento.Text, 64);
+    WriteString(frmNovoEnsaio.edTamanho.Text, 2);
+	WriteString(frmNovoEnsaio.cbNormaUtilizar.Text, 16);
+	WriteString(frmResultados.lbEnsaios.Caption, 12);
+
+	xPos := Pos(' ',frmResultados.lbMaximo.Caption) ;
+	sTxt := frmResultados.lbMaximo.Caption ;
+	Delete(sTxt,XPos,5);
+	WriteString(sTxt, 7);
+
+	xPos := Pos(' ',frmResultados.lbNMaximo.Caption) ;
+	sTxt := frmResultados.lbNMaximo.Caption ;
+	Delete(sTxt,XPos,5);
+	WriteString(sTxt, 5);
+
+	xPos := Pos(' ',frmResultados.lbAltImp.Caption) ;
+	sTxt := frmResultados.lbAltImp.Caption ;
+	Delete(sTxt,XPos, 5) ;
+	WriteString(sTxt, 4);
+
+	xPos := Pos(' ',frmResultados.lbResReal.Caption) ;
+	sTxt := frmResultados.lbResReal.Caption ;
+	Delete(sTxt, XPos, 5) ;
+	WriteString(sTxt, 5);
+
+	xPos := Pos(' ',frmResultados.lbVelImp.Caption) ;
+	sTxt := frmResultados.lbVelImp.Caption ;
+	Delete(sTxt, XPos, 5) ;
+	WriteString(sTxt, 5);
+
+	WriteString(frmResultados.edDesacPrimLimite.Text, 3);
+	WriteString(frmResultados.edDesacSegLimite.Text, 3);
+	WriteString(frmResultados.edTempoPrimLimite.Text, 3);
+	WriteString(frmResultados.edTempoSegLimite.Text, 3);
+
+	xPos := Pos(' ',frmResultados.lbTempo1.Caption) ;
+	sTxt := frmResultados.lbTempo1.Caption ;
+	Delete(sTxt, XPos, 5) ;
+	WriteString(sTxt, 5);
+
+    if not (frmResultados.lbTempo2.Caption='Não aplicável')then
+    begin
+		xPos := Pos(' ',frmResultados.lbTempo2.Caption) ;
+		sTxt := frmResultados.lbTempo2.Caption ;
+		Delete(sTxt, XPos, 5) ;
+		WriteString(sTxt, 5);
+    end else WriteString('     ', 5);
+
+	WriteString(frmNovoEnsaio.sResVel, 4) ;
+	//Conforme ou não conforme
+	if frmResultados.lbResult.Caption = 'CONFORME' then
+	WriteString('cc', 2) else WriteString('nc', 2) ;
+
+
+
+	fsImp.Write(lPontosImpacto, SizeOf(lPontosImpacto));
+	for i:=0 to lPontosImpacto-1 do
+	begin
+		dfX := frmGrafico.lsLinha.XValue[i];
+		dfY := frmGrafico.lsLinha.YValue[i];
+		fsImp.Write(dfX, SizeOf(dfX));
+		fsImp.Write(dfY, SizeOf(dfY));
+	end;
+	fsImp.Free;
+end;
+
+
+{===============================================================================
+
+===============================================================================}
+procedure TfrmHelmet.LoadImpacto(FileName: TFileName);
+var
+	fsImp		:	TFileStream;
+	i				:	integer;
+	dfX			:	single;
+	dfY			:	single;
+	sBuff		:	string;
+	xPos		: integer ;
+
+    //Valores temporários lidos do arquivo
+    AMax : string ;
+    TLim1 : string ;
+    TLim2 : string ;
+
+
+	procedure ReadString(var sValue: string; iSize: integer);
+	var
+		sTemp		:	string;
+	begin
+		sTemp := Spaces(iSize);
+		fsImp.Read(sTemp[1], iSize);
+		sValue := sTemp;
+	end;
+
+begin
+	if (FileName='') then Exit;
+	fsImp := TFileStream.Create(FileName, fmOpenRead);
+	ReadString(sBuff, 5);
+	if (sBuff<>IMPACTO_ID) then
+	begin
+		ShowMessage('Formato de arquivo inválido');
+		fsImp.Free;
+		Exit;
+	end;
+
+	ReadString(sBuff,5) ;
+	xPos := Pos(' ', sBuff) ;
+	if xPos <> 0 then Delete(sBuff, xPos, 5) ;
+	frmNovoEnsaio.dMax := StrToFloat(sBuff) ;
+	ReadString(sBuff,5) ;
+	xPos := Pos(' ', sBuff) ;
+	if xPos <> 0 then Delete(sBuff, xPos, 5) ;
+ 	frmNovoEnsaio.PosicaoX := StrToInt(sBuff) ;
+
+	ReadString(sBuff, 64);
+	frmNovoEnsaio.cbEmpresa.Text := sBuff;
+	frmResultados.lbEmpresa.Caption := sBuff;
+	frmImpactoPrint.stEmpresa.Caption := sBuff ;
+	ReadString(sBuff, 16);
+	frmNovoEnsaio.cbModeloCapacete.Text := sBuff;
+	frmResultados.lbModelo.Caption := sBuff ;
+	frmImpactoPrint.stCapacete.Caption := sBuff ;
+	ReadString(sBuff, 16);
+	frmNovoEnsaio.edNumeroAmostra.Text := sBuff;
+	frmResultados.lbAmostra.Caption := sBuff ;
+	frmImpactoPrint.stAmostra.Caption := sBuff ;
+	ReadString(sBuff, 16);
+	frmNovoEnsaio.edNumeroLote.Text := sBuff;
+	frmResultados.lbLote.Caption := sBuff ;
+	frmImpactoPrint.stLote.Caption := sBuff ;
+	ReadString(sBuff, 16);
+	frmNovoEnsaio.edPosicaoEnsaio.Text := sBuff;
+	frmResultados.lbEnsaio.Caption := sBuff ;
+	frmImpactoPrint.stEnsaio.Caption := sBuff ;
+	ReadString(sBuff, 64);
+	frmNovoEnsaio.edCondicionamento.Text := sBuff;
+	frmResultados.lbCondicionamento.Caption := sBuff;
+	frmImpactoPrint.stCondicionamento.Caption := sBuff;
+    ReadString(sBuff, 2);
+    frmNovoEnsaio.edTamanho.Text := sBuff;
+    frmResultados.lbTamanho.Caption := sBuff;
+    frmImpactoPrint.stTamanho.Caption := sBuff;
+	ReadString(sBuff, 16);
+	frmResultados.lbNorma.Caption := sBuff;
+	frmImpactoPrint.stNormaUtilizada.Caption := sBuff;
+	ReadString(sBuff, 12);
+	frmResultados.lbEnsaios.Caption := sBuff ;
+	//frmImpactoPrint.stPage.Caption := sBuff;
+
+	ReadString(sBuff, 7);
+	frmResultados.lbMaximo.Caption := sBuff + 'g';
+	frmImpactoPrint.stAceleracaoMaxima.Caption := sBuff + ' g' ;
+	AMax := sBuff ;
+	ReadString(sBuff, 5);
+	frmResultados.lbNMaximo.Caption := sBuff + 'g';
+	frmImpactoPrint.stAceleracaoMaximaNorma.Caption := sBuff + ' g' ;
+    if strtofloat(AMax) > strtofloat(sBuff) then
+    begin
+    	frmResultados.lbMaximo.Font.Color := clRed ;
+    	frmImpactoPrint.stAceleracaoMaxima.Font.Color := clRed ;
+    end
+    else
+    begin
+    	frmResultados.lbMaximo.Font.Color := RGB(0,255,0) ;
+    	frmImpactoPrint.stAceleracaoMaxima.Font.Color := clBlue ;
+    end;
+	ReadString(sBuff, 4);
+	frmResultados.lbAltImp.Caption := sBuff + ' m';
+	//frmImpactoPrint.stAlturaImpactoNorma.Caption := sBuff + ' m';
+	ReadString(sBuff, 5);
+	frmResultados.lbResReal.Caption := sBuff + 'm/s';
+	//frmImpactoPrint.stAlturaRealNorma.Caption := sBuff + ' m/s';
+	ReadString(sBuff, 5);
+	frmResultados.lbVelImp.Caption := sBuff + 'm/s';
+	frmImpactoPrint.stVelocidadeImpactoNorma.Caption := sBuff + ' m/s';
+
+	ReadString(sBuff, 3);
+	frmResultados.edDesacPrimLimite.Text := sBuff ;
+	frmImpactoPrint.stTempoIS1Norma.Caption := sBuff ;
+	ReadString(sBuff, 3);
+	frmResultados.edDesacSegLimite.Text := sBuff ;
+	frmImpactoPrint.stTempoIS2Norma.Caption := sBuff ;
+	ReadString(sBuff, 3) ;
+    TLim1 := sBuff ;
+	frmResultados.edTempoPrimLimite.Text := sBuff ;
+	frmImpactoPrint.stTempoIS1Norma.Caption :=
+	frmImpactoPrint.stTempoIS1Norma.Caption + ' - ' + sBuff ;
+	ReadString(sBuff, 3) ;
+    TLim2 := sBuff ;
+	frmResultados.edTempoSegLimite.Text := sBuff ;
+	frmImpactoPrint.stTempoIS2Norma.Caption :=
+	frmImpactoPrint.stTempoIS2Norma.Caption + ' - ' + sBuff ;
+
+	ReadString(sBuff, 5) ;
+	frmResultados.lbTempo1.Caption := sBuff + ' ms';
+	frmImpactoPrint.stTempoS1.Caption := sBuff + ' ms';
+    if strtofloat(sBuff) > strtofloat(TLim1) then
+    begin
+	    frmResultados.lbTempo1.Font.Color := clRed ;
+	    frmImpactoPrint.stTempoS1.Font.Color := clRed ;
+    end
+    else
+    begin
+	    frmResultados.lbTempo1.Font.Color := RGB(0,255,0) ;
+	    frmImpactoPrint.stTempoS1.Font.Color := clBlue ;
+    end;
+	ReadString(sBuff, 5) ;
+    if sBuff <> '     ' then
+    begin
+    if strtofloat(sBuff) > strtofloat(TLim2) then
+    begin
+	    frmResultados.lbTempo2.Font.Color := clRed ;
+	    frmImpactoPrint.stTempoS2.Font.Color := clRed ;
+    end
+    else
+    begin
+	    frmResultados.lbTempo2.Font.Color := RGB(0,255,0) ;
+	    frmImpactoPrint.stTempoS2.Font.Color := clBlue ;
+    end;
+
+	frmResultados.lbTempo2.Caption := sBuff + ' ms';
+	frmImpactoPrint.stTempoS2.Caption := sBuff + ' ms';
+    end
+    else
+    begin
+	    frmResultados.lbTempo2.Font.Color := RGB(0,255,0) ;
+	    frmImpactoPrint.stTempoS2.Font.Color := clBlack ;
+
+    	frmResultados.lbTempo2.Caption := 'Não aplicável' ;
+      frmImpactoPrint.stTempoS2.Caption := 'Não aplicável' ;
+    end;
+	ReadString(sBuff, 4) ;
+	frmResultados.lbTemp.Caption := sBuff + ' m/s' ;
+    frmImpactoPrint.stVelReal.Caption := sBuff + ' m/s' ;
+
+	ReadString(sBuff, 2) ;
+	if sBuff = 'nc' then
+	begin
+		frmResultados.lbResult.Font.Color := RGB(255, 0, 0) ;
+		frmResultados.lbResult.Caption := 'NÃO CONFORME' ;
+		//frmImpactoPrint.stResultado.Font.Color := RGB(255, 0, 0) ;
+		//frmImpactoPrint.stResultado.Caption := 'NÃO CONFORME' ;
+	end
+	else
+	begin
+		frmResultados.lbResult.Font.Color := RGB(0, 0, 255) ;
+		frmResultados.lbResult.Caption := 'CONFORME' ;
+		//frmImpactoPrint.stResultado.Font.Color := RGB(0, 0, 255) ;
+		//frmImpactoPrint.stResultado.Caption := 'CONFORME' ;
+	end;
+
+	fsImp.Read(lPontosImpacto, SizeOf(lPontosImpacto));
+	frmProgress.pbOpen.Position := 0 ;
+	frmProgress.Show ;
+	frmProgress.Animate.Active := true ;
+	frmGrafico.lsLinha.Clear ;
+	for i:=0 to lPontosImpacto-1 do
+	begin
+		fsImp.Read(dfX, SizeOf(dfX));
+		fsImp.Read(dfY, SizeOf(dfY));
+        //if dfy > strtoint(edit1.text) then
+        //dfy:=StrToFloat(InputBox('Graphic Value','Valor: '+FloatToStr(dfy)+' Pos: '+InttoStr(i), FloatToStr(dfy)));
+		frmGrafico.lsLinha.XValues.AddChartValue(dfX);
+		frmGrafico.lsLinha.YValues.AddChartValue(dfY);
+		frmProgress.pbOpen.Position := frmProgress.pbOpen.Position + 1 ;
+	end;
+	frmProgress.Animate.Active := true ;
+	frmProgress.Close ;
+	fsImp.Free;
+    frmGrafico.tcGrafico.Series[1].active := false ;
+	frmGrafico.tcGrafico.Series[2].active := false ;
+	frmGrafico.tcGrafico.Series[3].active := false ;
+end;
+
+
+{===============================================================================
+
+===============================================================================}
+procedure TfrmHelmet.bbSalvarEnsaioClick(Sender: TObject);
+begin
+	if EnsaioAtual=eaNone then Exit;
+	if not dlgSalvar.Execute then Exit;
+	case EnsaioAtual of
+		eaImpacto:	SaveImpacto(dlgSalvar.FileName);
+//	eaPerfuracao:	SavePerfuracao(dlgSalvar.Filename) ;
+//	eaViseira:		SaveViseira(dlgSalvar.Filename) ;
+//	eaCinta:      SaveCinta(dlgSalvar.Filename) ;
+	end;
+end;
+
+
+{===============================================================================
+
+===============================================================================}
+procedure TfrmHelmet.bbExibirGraficoClick(Sender: TObject);
+begin
+	frmGrafico.Left := Left;
+	frmGrafico.Top := Top;
+	frmGrafico.Width := Width;
+	frmGrafico.Height := Height;
+	frmGrafico.WindowState := WindowState;
+	frmGrafico.Show;
+end;
+
+procedure TfrmHelmet.bbAbrirEnsaioClick(Sender: TObject);
+begin
+	if IDYES=Application.MessageBox('Abrir último ensaio?', 'Abrir', mb_applmodal+mb_iconquestion+mb_yesno+mb_defbutton1) then
+	begin
+		if not FileExists('UltimoEnsaio.hmi') then
+		begin
+			ShowMEssage('Arquivo -UltimoEnsaio- não encontrado.');
+			Exit;
+		end else
+		LoadImpacto('UltimoEnsaio.hmi');
+	end else
+	begin
+	if not dlgAbrir.Execute then Exit;
+	case dlgAbrir.FilterIndex of
+		1 :	LoadImpacto(dlgAbrir.FileName);
+		// 2: LoadViseira;
+		// 3: LoadPerfuração;
+	end;
+	end;
+    frmImpactoPrint.stTamanho.Caption := ''
+end;
+
+procedure TfrmHelmet.bbResultadosEnsaioClick(Sender: TObject);
+begin
+	frmResultados.Show ;
+end;
+
+function TfrmHelmet.ScanForLimits( limite : double ) : double ;
+	var tempo,i : integer ;
+			iY : double ;
+begin
+		tempo := 0 ;
+		for i := 0 to 9999 do // RateChange
+		begin
+			iY := frmGrafico.lsLinha.YValue[i];
+			if iY >= limite then	inc(tempo) ;
+		end;
+		ScanForLimits := (tempo * 0.1) ; // Resultado em milissegundos
+end ;
+procedure TfrmHelmet.mnuSobreClick(Sender: TObject);
+begin
+	frmAbout.Show ;
+end;
+
+procedure TfrmHelmet.mnuConfigurarImpressoraClick(Sender: TObject);
+begin
+	frmHelmet.dlgPrinterSetup.Execute ;
+end;
+
+procedure TfrmHelmet.bbContinuarEnsaioClick(Sender: TObject);
+begin
+	frmNovoEnsaio.nbPages.ActivePage := 'Formulário Geral' ;
+	frmNovoEnsaio.nbPages.PageIndex := 1 ;
+	frmNovoEnsaio.Show ;
+end;
+
+procedure TfrmHelmet.Timer1Timer(Sender: TObject);
+begin
+				timer1.enabled := false ;
+				CbDBitOut(0, AUXPORT, 2, 0) ;  // Liga Fonte do motor
+       	//CbDBitOut(0, AUXPORT, 3, 1) ;  //coloca em modo normal
+				frmMachineControl.Delay(2000);
+        try
+	        frmMachineControl.Comm.StopComm ;
+			frmMachineControl.Comm.StartComm ;
+        except end;
+					frmMachineControl.Delay(2000);
+					frmMachineControl.ComandoMotor(#13'ST1'#13) ;
+					frmMachineControl.Comm.StopComm ;
+end;
+
+
+
+procedure TfrmHelmet.mnuPosClick(Sender: TObject);
+begin
+	frmPos.ShowModal ;
+end;
+
+procedure TfrmHelmet.Condicionamentos1Click(Sender: TObject);
+begin
+	frmCondicionamento.ShowModal ;
+end;
+
+procedure TfrmHelmet.mnuConteudoClick(Sender: TObject);
+begin
+	Application.HelpContext(101);
+end;
+
+procedure TfrmHelmet.Atrito1Click(Sender: TObject);
+begin
+	frmAtrito.Show ;
+end;
+
+procedure TfrmHelmet.Acelermetros1Click(Sender: TObject);
+begin
+	frmAcelerometros.Show;
+end;
+
+procedure TfrmHelmet.Perfurao1Click(Sender: TObject);
+begin
+	frmP.Show;
+end;
+
+end.

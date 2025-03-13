@@ -1,0 +1,7 @@
+Copie todos os arquivos para o diretório de novos componentes (aquele
+mesmo onde você copiou o componente para a porta paralela) e
+instale APENAS o arquivo CPort.pas, pois os outros são usados
+indireta e automaticamente na instalação.
+
+eddv@mailbr.com.br
+Eduardo.

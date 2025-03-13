@@ -1,0 +1,26 @@
+Instruções para instalação do novo Software - Helmet / INT
+
+1. Criar uma nova pasta que conterá a versão antiga do Helmet
+    Ex.: C:\INT\ANTERIOR
+
+2. Copiar os arquivos abaixo listados para dentro da nova pasta:
+
+ a. HELMET.EXE
+ b. IMPACTO.NRI
+ c. CINTA.NRC
+ d. VISEIRA.NRV
+ e. PERFURACAO.NRP
+ f. POS.DAT
+ g. COND.DAT
+ h. EMPRESAS.DAT
+ i. CAPACETES.DAT
+ j. HELMET.DB
+ k. ANTERIOR.DB
+
+3. Criar, na área de trabalho, um atalho para o executável C:\INT\ANTERIOR\HELMET.EXE
+   Obs: Dar ao atalho um nome autoexplicativo, ex.: "Helmet anterior" ou
+        "Helmet para ensaios antigos".
+
+4. Apagar o software antigo na pasta C:\INT
+
+4. Copiar a nova versão do programa para a pasta C:\INT
